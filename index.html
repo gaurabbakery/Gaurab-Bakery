@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sweet Delight Bakery</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<section class="header">
+
+  <h1 class="brand">SWEET DELIGHT</h1>
+  <p class="motto">Fresh. Minimal. Handmade Perfection.</p>
+  <p class="desc">Premium bakery crafted daily with love.</p>
+
+  <!-- SEARCH + CART -->
+  <div class="topbar">
+
+    <input id="search" placeholder="Search cakes..." onkeyup="searchProduct()">
+
+    <button class="cart-btn" onclick="goCart()">
+      🛒 Cart (<span id="cartCount">0</span>)
+    </button>
+
+  </div>
+
+</section>
+
+<!-- PRODUCTS -->
+<section class="grid">
+
+  <!-- PRODUCT -->
+  <div class="card">
+
+    <div class="img-wrap">
+      <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587">
+    </div>
+
+    <div class="content">
+      <h2>Chocolate Cake</h2>
+      <p>Rich cocoa layered soft cake</p>
+      <div class="price">Rs. 1200</div>
+
+      <div class="btn-row">
+
+        <button class="order"
+          onclick="orderNow('Chocolate Cake')">
+          Order Now
+        </button>
+
+        <button class="cart"
+          onclick="addToCart('Chocolate Cake')">
+          Add to Cart
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PRODUCT -->
+  <div class="card">
+
+    <div class="img-wrap">
+      <img src="https://images.unsplash.com/photo-1562440499-64c9a111f713">
+    </div>
+
+    <div class="content">
+      <h2>Strawberry Cake</h2>
+      <p>Fresh cream berry delight</p>
+      <div class="price">Rs. 1000</div>
+
+      <div class="btn-row">
+
+        <button class="order"
+          onclick="orderNow('Strawberry Cake')">
+          Order Now
+        </button>
+
+        <button class="cart"
+          onclick="addToCart('Strawberry Cake')">
+          Add to Cart
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>

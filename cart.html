@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cart</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1 style="text-align:center;">Your Cart</h1>
+
+<div class="grid" id="cartBox"></div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function render(){
+  let box = document.getElementById("cartBox");
+
+  if(cart.length === 0){
+    box.innerHTML = "<p style='text-align:center;'>Cart is empty</p>";
+    return;
+  }
+
+  box.innerHTML = cart.map((item,i)=>
+    `
+    <div class="card">
+      <div class="content">
+        <h2>${item}</h2>
+
+        <button onclick="remove(${i})"
+        style="background:red;margin-top:10px;">
+          Remove
+        </button>
+
+      </div>
+    </div>
+    `
+  ).join("");
+}
+
+function remove(i){
+  cart.splice(i,1);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
