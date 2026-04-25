@@ -22,27 +22,43 @@ function render(){
     return;
   }
 
-  box.innerHTML = cart.map((item,i)=>
-    `
+  box.innerHTML = cart.map((item,i)=>`
     <div class="card">
-      <div class="content">
-        <h2>${item}</h2>
 
-        <button onclick="remove(${i})"
+      <div class="img-wrap">
+        <img src="${item.img}">
+      </div>
+
+      <div class="content">
+        <h2>${item.name}</h2>
+        <p>${item.price}</p>
+
+        <button onclick='orderNow(${JSON.stringify(item)})'
+        style="background:black;color:white;margin-top:10px;">
+          Order Now
+        </button>
+
+        <button onclick="removeItem(${i})"
         style="background:red;margin-top:10px;">
           Remove
         </button>
 
       </div>
+
     </div>
-    `
-  ).join("");
+  `).join("");
 }
 
-function remove(i){
+function removeItem(i){
   cart.splice(i,1);
   localStorage.setItem("cart", JSON.stringify(cart));
   render();
+}
+
+function orderNow(item){
+  let phone = "9779860228877";
+  let text = `I want to order:\n${item.name}\nPrice: ${item.price}`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`);
 }
 
 render();
