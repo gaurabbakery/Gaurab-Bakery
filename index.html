@@ -9,91 +9,49 @@
 
 <body>
 
-<!-- HEADER -->
 <section class="header">
-
   <h1 class="brand">GAURAB BAKERY</h1>
   <p class="motto">A little bite of happiness in every slice.</p>
   <p class="desc">Sweet bakery crafted daily with love for a smile on your face.</p>
 
-  <!-- SEARCH + CART -->
   <div class="topbar">
-
     <input id="search" placeholder="Search cakes..." onkeyup="searchProduct()">
 
     <button class="cart-btn" onclick="goCart()">
       🛒 Cart (<span id="cartCount">0</span>)
     </button>
-
   </div>
-
 </section>
 
-<!-- PRODUCTS -->
-<section class="grid">
-
-  <!-- PRODUCT -->
-  <div class="card">
-
-    <div class="img-wrap">
-      <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587">
-    </div>
-
-    <div class="content">
-      <h2>Chocolate Cake</h2>
-      <p>Rich chocolate layered soft cake</p>
-      <div class="price">Rs.700 </div>
-
-      <div class="btn-row">
-
-        <button class="order"
-          onclick="orderNow('Chocolate Cake')">
-          Order Now
-        </button>
-
-        <button class="cart"
-          onclick="addToCart('Chocolate Cake')">
-          Add to Cart
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- PRODUCT -->
-  <div class="card">
-
-    <div class="img-wrap">
-      <img src="https://images.unsplash.com/photo-1562440499-64c9a111f713">
-    </div>
-
-    <div class="content">
-      <h2>Strawberry Cake</h2>
-      <p>Fresh cream strawberry delight</p>
-      <div class="price">Rs. 600 </div>
-
-      <div class="btn-row">
-
-        <button class="order"
-          onclick="orderNow('Strawberry Cake')">
-          Order Now
-        </button>
-
-        <button class="cart"
-          onclick="addToCart('Strawberry Cake')">
-          Add to Cart
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
+<section class="grid" id="productGrid"></section>
 
 <script src="script.js"></script>
+
+<footer class="footer">
+
+  <div class="footer-content">
+
+    <h2>Gaurab Bakery</h2>
+    <p>Freshly baked happiness every day.</p>
+
+    <div class="footer-info">
+      <p>📍 Bhairav Aryal Marg, Kathmandu</p>
+      <p>📞 +977 9860228877</p>
+      <p>✉ gaurabbakery@gmail.com</p>
+    </div>
+
+    <div class="footer-links">
+      <a href="#">Home</a>
+      <a href="#">Products</a>
+      <a href="#">Cart</a>
+    </div>
+
+    <p class="copyright">
+      © 2026 Gaurab Bakery. All rights reserved.
+    </p>
+
+  </div>
+
+</footer>
 </body>
 </html>
