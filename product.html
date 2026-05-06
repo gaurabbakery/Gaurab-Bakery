@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product – Gaurab Bakery</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f5f7; color: #1d1d1f; min-height: 100vh;
+  }
+
+  .top-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px; background: #fff;
+    border-bottom: 1px solid #e8e8e8;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+  .top-bar h2 {
+    flex: 1; text-align: center; font-size: 16px;
+    font-weight: 700; color: #1d1d1f;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .close-btn {
+    background: #1d1d1f; color: #fff; border: none;
+    border-radius: 20px; padding: 9px 18px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    flex-shrink: 0; transition: background .2s;
+  }
+  .close-btn:hover { background: #444; }
+  .share-btn {
+    background: #f0f0f0; color: #444; border: none;
+    border-radius: 20px; padding: 9px 14px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    flex-shrink: 0; transition: background .2s;
+  }
+  .share-btn:hover { background: #e2e2e2; }
+
+  .detail-wrap {
+    max-width: 960px; margin: 28px auto;
+    padding: 0 18px 80px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 36px;
+  }
+  @media(max-width:680px) { .detail-wrap { grid-template-columns:1fr; gap:18px; margin:14px auto; } }
+
+  /* Slideshow */
+  .main-slide {
+    position: relative; width: 100%; height: 380px;
+    border-radius: 20px; overflow: hidden; background: #fff;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    touch-action: pan-y; user-select: none;
+  }
+  @media(max-width:680px) { .main-slide { height: 260px; } }
+  .slides-track {
+    display: flex; height: 100%;
+    transition: transform 0.42s cubic-bezier(0.4,0,0.2,1); will-change: transform;
+  }
+  .slide { min-width: 100%; height: 100%; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; display: block; }
+
+  .slide-counter {
+    position: absolute; bottom: 12px; right: 14px;
+    background: rgba(0,0,0,0.45); color: #fff;
+    padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  }
+  .arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.94); border: none; border-radius: 50%;
+    width: 40px; height: 40px; font-size: 17px; cursor: pointer; color: #1d1d1f;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.13); z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .arrow:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.2); transform: translateY(-50%) scale(1.08); }
+  .arrow-left  { left: 12px; }
+  .arrow-right { right: 12px; }
+
+  .dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+  .dot { height:7px; width:7px; border-radius:4px; background:#ccc; cursor:pointer; transition:background .25s,width .3s; }
+  .dot.active { background:#1d1d1f; width:22px; }
+
+  .thumbs { display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding-bottom:4px; }
+  .thumbs::-webkit-scrollbar { height:3px; }
+  .thumbs::-webkit-scrollbar-thumb { background:#bbb; border-radius:3px; }
+  .thumb {
+    flex-shrink:0; width:64px; height:64px; border-radius:11px; overflow:hidden;
+    cursor:pointer; border:2.5px solid transparent; background:#fff;
+    transition:border-color .2s,transform .2s; box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  }
+  .thumb:hover { transform:scale(1.06); }
+  .thumb.active { border-color:#1d1d1f; }
+  .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+
+  /* Info column */
+  .info-col { display:flex; flex-direction:column; gap:16px; }
+
+  .product-name { font-size:26px; font-weight:800; color:#1d1d1f; line-height:1.2; }
+  @media(max-width:480px) { .product-name { font-size:22px; } }
+
+  .price-box {
+    background:#fff; border-radius:16px; padding:14px 18px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.07);
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .product-price { font-size:28px; font-weight:800; color:#1d1d1f; transition:transform .2s; }
+  .price-per-note { font-size:13px; color:#aaa; font-weight:400; }
+
+  .product-desc { font-size:14px; color:#555; line-height:1.8; }
+
+  .detail-table { width:100%; border-collapse:collapse; }
+  .detail-table tr { border-bottom:1px solid #efefef; }
+  .detail-table tr:last-child { border-bottom:none; }
+  .detail-table td { padding:9px 4px; font-size:13px; vertical-align:top; }
+  .detail-table td:first-child { color:#999; font-weight:500; width:38%; }
+  .detail-table td:last-child  { color:#1d1d1f; font-weight:600; }
+
+  /* Weight selector */
+  .weight-section { display:flex; flex-direction:column; gap:10px; }
+  .section-label  { font-size:13px; font-weight:700; color:#1d1d1f; }
+  .weight-options { display:flex; flex-wrap:wrap; gap:8px; }
+  .weight-btn {
+    padding:9px 18px; border-radius:20px;
+    border:1.5px solid #d8d8d8; background:#fff;
+    color:#1d1d1f; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all .18s;
+  }
+  .weight-btn:hover  { border-color:#999; }
+  .weight-btn.active { background:#1d1d1f; color:#fff; border-color:#1d1d1f; }
+
+  /* Quantity */
+  .qty-section { display:flex; flex-direction:column; gap:10px; }
+  .qty-ctrl {
+    display:inline-flex; align-items:center;
+    background:#fff; border:1.5px solid #d8d8d8; border-radius:14px; overflow:hidden;
+  }
+  .qty-btn {
+    background:none; border:none; width:42px; height:42px;
+    font-size:22px; font-weight:300; cursor:pointer; color:#1d1d1f;
+    display:flex; align-items:center; justify-content:center; transition:background .15s;
+  }
+  .qty-btn:hover { background:#f5f5f5; }
+  .qty-num {
+    width:48px; text-align:center; font-size:16px; font-weight:700;
+    color:#1d1d1f; border:none; outline:none; background:transparent;
+    -moz-appearance:textfield;
+  }
+  .qty-num::-webkit-inner-spin-button,
+  .qty-num::-webkit-outer-spin-button { -webkit-appearance:none; }
+
+  /* Action buttons — reuse style.css classes */
+  .action-row { display:flex; gap:10px; }
+  .action-row .order,
+  .action-row .cart {
+    flex:1; padding:13px 10px !important;
+    font-size:14px !important; font-weight:700 !important;
+    border-radius:14px !important; cursor:pointer;
+    position:relative; overflow:hidden;
+    transition:opacity .2s, transform .15s !important;
+  }
+  .action-row .order:hover,
+  .action-row .cart:hover { opacity:.88; transform:translateY(-1px); }
+  .action-row .cart.added { background:#34c759 !important; color:#fff !important; border-color:#34c759 !important; }
+
+  .trust-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .trust-badge {
+    background:#f5f5f5; border:1px solid #efefef; border-radius:10px;
+    padding:7px 12px; font-size:11px; font-weight:600; color:#555;
+  }
+
+  /* ── Same Order Popup as home page ── */
+  #pd-overlay {
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.55);
+    align-items:center; justify-content:center; padding:20px;
+  }
+  #pd-overlay.open { display:flex; }
+  #pd-popup {
+    background:#fff; border-radius:24px;
+    padding:26px 22px; width:100%; max-width:360px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.22);
+    animation:pdPopIn .22s ease;
+  }
+  @keyframes pdPopIn { from{transform:scale(0.9);opacity:0;} to{transform:scale(1);opacity:1;} }
+  #pd-popup .pop-img {
+    width:100%; height:160px; object-fit:cover;
+    border-radius:14px; margin-bottom:14px; display:block; background:#f5f5f5;
+  }
+  #pd-popup .pop-name    { font-size:19px; font-weight:800; color:#1a1a1a; margin-bottom:3px; }
+  #pd-popup .pop-note    { font-size:12px; color:#aaa; margin-bottom:14px; }
+  #pd-popup .pop-lbl     { font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
+  #pd-popup .pop-weights { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+  #pd-popup .pop-w-btn {
+    padding:7px 14px; border-radius:20px;
+    border:1.5px solid #ddd; background:#fff;
+    font-size:13px; font-weight:600; color:#333; cursor:pointer; transition:all .15s;
+  }
+  #pd-popup .pop-w-btn:hover  { border-color:#888; }
+  #pd-popup .pop-w-btn.active { background:#1a1a1a; color:#fff; border-color:#1a1a1a; }
+  #pd-popup .pop-price-box {
+    background:#f8f8f8; border-radius:13px;
+    padding:13px 16px; margin-bottom:18px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  #pd-popup .pop-price-lbl { font-size:13px; color:#888; font-weight:500; }
+  #pd-popup .pop-price-val { font-size:22px; font-weight:800; color:#1a1a1a; transition:transform .18s; }
+  #pd-popup .pop-actions   { display:flex; gap:10px; }
+  #pd-popup .pop-cancel {
+    flex:1; padding:13px; border-radius:14px;
+    border:1.5px solid #e0e0e0; background:#fff;
+    font-size:14px; font-weight:600; color:#555; cursor:pointer;
+  }
+  #pd-popup .pop-cancel:hover { background:#f5f5f5; }
+  #pd-popup .pop-confirm {
+    flex:2; padding:13px; border-radius:14px;
+    border:none; background:#25d366; color:#fff;
+    font-size:14px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:opacity .15s;
+  }
+  #pd-popup .pop-confirm:hover { opacity:.88; }
+
+  @keyframes ripple { to{transform:scale(3);opacity:0;} }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <button class="close-btn" id="closeBtn">✕ Close</button>
+  <h2 id="topTitle">Gaurab Bakery</h2>
+  <button class="share-btn" id="shareBtn">📤 Share</button>
+</div>
+
+<div class="detail-wrap">
+  <div>
+    <div class="main-slide" id="mainSlide">
+      <div class="slides-track" id="slidesTrack"></div>
+      <div class="slide-counter" id="slideCounter">1 / 1</div>
+      <button class="arrow arrow-left"  id="arrowLeft">&#8592;</button>
+      <button class="arrow arrow-right" id="arrowRight">&#8594;</button>
+    </div>
+    <div class="dots"   id="dots"></div>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+  <div class="info-col" id="infoCol"></div>
+</div>
+
+<!-- Order Popup (identical to home page popup) -->
+<div id="pd-overlay">
+  <div id="pd-popup">
+    <img class="pop-img" id="pdPopImg" src="" alt="">
+    <div class="pop-name" id="pdPopName"></div>
+    <div class="pop-note" id="pdPopNote"></div>
+    <div class="pop-lbl">Select Weight</div>
+    <div class="pop-weights" id="pdPopWeights"></div>
+    <div class="pop-price-box">
+      <div class="pop-price-lbl">Total Price</div>
+      <div class="pop-price-val" id="pdPopPrice"></div>
+    </div>
+    <div class="pop-actions">
+      <button class="pop-cancel"  onclick="closePdPopup()">Cancel</button>
+      <button class="pop-confirm" onclick="confirmPdPopup()">📲 Order on WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Ripple ── */
+document.addEventListener("click", e => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  const circle = document.createElement("span");
+  const d = Math.max(btn.offsetWidth, btn.offsetHeight);
+  const r = btn.getBoundingClientRect();
+  circle.style.cssText = `position:absolute;border-radius:50%;background:rgba(255,255,255,0.3);
+    width:${d}px;height:${d}px;pointer-events:none;
+    left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px;
+    transform:scale(0);animation:ripple .5s linear;z-index:10;`;
+  btn.appendChild(circle);
+  setTimeout(() => circle.remove(), 560);
+});
+
+/* ── FIXED parsePrice: grabs first integer from string ── */
+function parsePrice(s) {
+  const m = String(s || "").match(/\d+/);
+  return m ? parseInt(m[0], 10) : 0;
+}
+
+/* ── Product data ── */
+const BUILTIN = {
+  "Chocolate Cake"   :{ longDesc:"Our Chocolate Cake is a dream for every choco-lover. Layers of moist, dark-chocolate sponge are filled with velvety ganache and finished with a glossy chocolate mirror glaze. Every bite is rich, indulgent, and deeply satisfying.", details:{"Flavour":"Dark Chocolate","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["chocolatecake1.png","chocolatecake2.png","chocolatecake3.png"] },
+  "Strawberry Cake"  :{ longDesc:"A celebration of fresh berries and light cream! Fluffy vanilla sponge layered with clouds of whipped fresh cream and slices of ripe, hand-picked strawberries. Light, airy, and bursting with natural fruit flavour.", details:{"Flavour":"Fresh Cream & Strawberry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["strawberrycake.png","strawberrycake.png","strawberrycake.png"] },
+  "ButterScotch Cake":{ longDesc:"Warm, buttery, and irresistibly caramel — the ultimate comfort dessert. Golden sponge layers soaked in butterscotch syrup, frosted with silky caramel buttercream, and topped with crunchy butterscotch chips.", details:{"Flavour":"Butterscotch & Caramel","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["butterscotchcake.png","butterscotchcake.png","butterscotchcake.png"] },
+  "BarbieDoll Cake"  :{ longDesc:"A showstopper for every princess! Delicate vanilla-rose sponge sculpted into a gorgeous doll-dress shape, decorated with pastel fondant ruffles and edible pearls. The Barbie figurine stands tall at the centre.", details:{"Flavour":"Vanilla Rose","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["barbiedollcake.png"] },
+  "Vanilla Cake"     :{ longDesc:"A timeless classic beloved by all ages. Made with pure vanilla and the finest butter, creating a soft, airy sponge with a delicate fragrance. Frosted with silky smooth vanilla buttercream.", details:{"Flavour":"Pure Vanilla & Buttercream","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["vanillacake.png","vanillacake.png","vanillacake.png"] },
+  "Black Forest Cake"     :{ longDesc:"The legendary Black Forest — layers of rich dark chocolate sponge soaked in cherry syrup, filled with luscious whipped cream and whole cherries, then finished with chocolate shavings and a cherry on top.", details:{"Flavour":"Dark Chocolate & Cherry Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blackforest.png","blackforest.png","blackforest.png"] },
+  "White Forest Cake"     :{ longDesc:"An elegant twist on the classic forest cake. Delicate white chocolate sponge layered with smooth white chocolate cream and juicy cherries, topped with white chocolate curls.", details:{"Flavour":"White Chocolate & Cherry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["whiteforest.png","whiteforest.png","whiteforest.png"] },
+  "Blueberry Cake"   :{ longDesc:"Fresh, fruity, and wonderfully fragrant. Soft vanilla sponge loaded with plump fresh blueberries, layered with blueberry compote and topped with a generous mound of cream and fresh berries.", details:{"Flavour":"Blueberry & Vanilla Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blueberry.png","blueberry.png","blueberry.png"] }
+};
+
+const WEIGHTS = [
+  { label:"1 Pound",  lbs:1 },
+  { label:"2 Pounds", lbs:2 },
+  { label:"3 Pounds", lbs:3 },
+  { label:"4 Pounds", lbs:4 },
+  { label:"5 Pounds", lbs:5 }
+];
+
+const adminExtras  = JSON.parse(localStorage.getItem("gbExtras") || "{}");
+const extraDetails = Object.assign({}, BUILTIN, adminExtras);
+
+const P       = new URLSearchParams(window.location.search);
+const pName   = P.get("name")  || "";
+const pDesc   = P.get("desc")  || "";
+const pPrice  = P.get("price") || "";
+const pImg    = P.get("img")   || "";
+const baseAmt = parsePrice(pPrice);   /* e.g. "Rs.700" → 700 */
+
+const extra  = extraDetails[pName] || { longDesc:pDesc, details:{}, gallery:[pImg] };
+const images = extra.gallery?.length ? extra.gallery : [pImg];
+
+let qty            = 1;
+let selectedWeight = WEIGHTS[0];
+
+/* ── Live price on page ── */
+function updatePagePrice() {
+  const el = document.getElementById("livePrice");
+  if (!el) return;
+  el.textContent     = `Rs.${baseAmt * selectedWeight.lbs}`;
+  el.style.transform = "scale(1.12)";
+  setTimeout(() => el.style.transform = "scale(1)", 180);
+  const note = document.getElementById("weightNote");
+  if (note) note.textContent = selectedWeight.label.toLowerCase();
+}
+
+function selectWeight(idx) {
+  selectedWeight = WEIGHTS[idx];
+  document.querySelectorAll(".weight-btn").forEach((b,i) =>
+    b.classList.toggle("active", i===idx));
+  updatePagePrice();
+}
+
+function setQty(n) {
+  qty = Math.max(1, Math.min(99, parseInt(n)||1));
+  const el = document.getElementById("qtyNum");
+  if (el) el.value = qty;
+}
+
+/* ── Slideshow ── */
+let current=0, autoTimer;
+function updateSlide() {
+  document.getElementById("slidesTrack").style.transform=`translateX(-${current*100}%)`;
+  document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("active",i===current));
+  document.querySelectorAll(".thumb").forEach((t,i)=>t.classList.toggle("active",i===current));
+  document.getElementById("slideCounter").textContent=`${current+1} / ${images.length}`;
+}
+function goTo(i)    { current=(i+images.length)%images.length; updateSlide(); }
+function resetAuto(){ clearInterval(autoTimer); autoTimer=setInterval(()=>goTo(current+1),3800); }
+
+function buildSlideshow() {
+  const track=document.getElementById("slidesTrack");
+  const dotsEl=document.getElementById("dots");
+  const thumbs=document.getElementById("thumbs");
+  images.forEach((src,i)=>{
+    const sl=document.createElement("div"); sl.className="slide";
+    sl.innerHTML=`<img src="${src}" alt="${pName}" loading="${i===0?'eager':'lazy'}" onerror="this.style.background='#f0f0f0'">`;
+    track.appendChild(sl);
+    const dot=document.createElement("div"); dot.className="dot"+(i===0?" active":"");
+    dot.onclick=()=>{goTo(i);resetAuto();}; dotsEl.appendChild(dot);
+    const th=document.createElement("div"); th.className="thumb"+(i===0?" active":"");
+    th.innerHTML=`<img src="${src}" alt="photo ${i+1}">`;
+    th.onclick=()=>{goTo(i);resetAuto();}; thumbs.appendChild(th);
+  });
+  document.getElementById("arrowLeft").onclick =()=>{goTo(current-1);resetAuto();};
+  document.getElementById("arrowRight").onclick=()=>{goTo(current+1);resetAuto();};
+  const ms=document.getElementById("mainSlide"); let sx=0;
+  ms.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;},{passive:true});
+  ms.addEventListener("touchend",e=>{const d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>40){goTo(d>0?current+1:current-1);resetAuto();}},{passive:true});
+  ms.addEventListener("mousedown",e=>{sx=e.clientX;});
+  ms.addEventListener("mouseup",e=>{if(Math.abs(sx-e.clientX)>40){goTo(sx-e.clientX>0?current+1:current-1);resetAuto();}});
+  updateSlide(); resetAuto();
+}
+
+/* ── Build info ── */
+function buildInfo() {
+  const tableRows=Object.entries(extra.details||{}).filter(([,v])=>v)
+    .map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+  const wBtns=WEIGHTS.map((w,i)=>
+    `<button class="weight-btn${i===0?" active":""}" onclick="selectWeight(${i})">${w.label}</button>`
+  ).join("");
+  document.getElementById("infoCol").innerHTML=`
+    <h1 class="product-name">${pName}</h1>
+    <div class="price-box">
+      <div class="product-price" id="livePrice">Rs.${baseAmt}</div>
+      <div class="price-per-note">for <span id="weightNote">1 pound</span></div>
+    </div>
+    <p class="product-desc">${extra.longDesc}</p>
+    ${tableRows?`<table class="detail-table">${tableRows}</table>`:""}
+    <div class="weight-section">
+      <div class="section-label">⚖️ Select Weight</div>
+      <div class="weight-options">${wBtns}</div>
+    </div>
+    <div class="qty-section">
+      <div class="section-label">🔢 Quantity</div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="setQty(qty-1)">−</button>
+        <input class="qty-num" id="qtyNum" type="number" value="1" min="1" max="99" onchange="setQty(this.value)">
+        <button class="qty-btn" onclick="setQty(qty+1)">+</button>
+      </div>
+    </div>
+    <div class="action-row">
+      <button class="order" onclick="openPdPopup()">Order Now</button>
+      <button class="cart"  id="cartBtn" onclick="addToCartPage()">Add to Cart</button>
+    </div>
+    <div class="trust-row">
+      <span class="trust-badge">🎂 Fresh Daily</span>
+      <span class="trust-badge">✨ Custom Orders</span>
+    </div>`;
+  document.getElementById("topTitle").textContent=pName;
+  document.title=pName+" – Gaurab Bakery";
+}
+
+/* ── Popup (same as home page) ── */
+let _pdPopWeight = WEIGHTS[0];
+
+function openPdPopup() {
+  /* pre-select whatever weight is chosen on the page */
+  _pdPopWeight = selectedWeight;
+
+  document.getElementById("pdPopImg").src          = pImg;
+  document.getElementById("pdPopImg").alt          = pName;
+  document.getElementById("pdPopName").textContent = pName;
+  document.getElementById("pdPopNote").textContent = `Rs.${baseAmt} per pound`;
+
+  document.getElementById("pdPopWeights").innerHTML = WEIGHTS.map((w,i)=>
+    `<button class="pop-w-btn${w.label===_pdPopWeight.label?" active":""}"
+             onclick="selectPdPopWeight(${i})">${w.label}</button>`
+  ).join("");
+
+  refreshPdPopPrice();
+  document.getElementById("pd-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function selectPdPopWeight(idx) {
+  _pdPopWeight = WEIGHTS[idx];
+  document.querySelectorAll("#pdPopWeights .pop-w-btn").forEach((b,i)=>
+    b.classList.toggle("active",i===idx));
+  refreshPdPopPrice();
+}
+
+function refreshPdPopPrice() {
+  const total = baseAmt * _pdPopWeight.lbs;
+  const el    = document.getElementById("pdPopPrice");
+  el.textContent     = `Rs.${total}`;
+  el.style.transform = "scale(1.12)";
+  setTimeout(()=>el.style.transform="scale(1)",180);
+}
+
+function closePdPopup() {
+  document.getElementById("pd-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function confirmPdPopup() {
+  const total = baseAmt * _pdPopWeight.lbs;
+  const text  =
+    `Hello! I want to order from Gaurab Bakery:\n\n`+
+    `🎂 Cake    : ${pName}\n`+
+    `⚖️ Weight  : ${_pdPopWeight.label}\n`+
+    `🔢 Quantity: ${qty}\n`+
+    `💰 Price   : Rs.${total}\n\n`+
+    `Please confirm my order. Thank you!`;
+  window.open(`https://wa.me/9779860228877?text=${encodeURIComponent(text)}`);
+  closePdPopup();
+}
+
+document.getElementById("pd-overlay").addEventListener("click",function(e){
+  if(e.target===this)closePdPopup();
+});
+
+/* ── Add to Cart ── */
+function addToCartPage() {
+  const total = baseAmt * selectedWeight.lbs;
+  const cart  = JSON.parse(localStorage.getItem("gbCart")||"[]");
+  const key   = pName+"|"+selectedWeight.label;
+  const ex    = cart.find(c=>(c.name+"|"+(c.weight||""))===key);
+  if(ex) ex.qty=(ex.qty||1)+qty;
+  else   cart.push({name:pName,desc:pDesc,price:"Rs."+total,img:pImg,weight:selectedWeight.label,basePrice:baseAmt,qty});
+  localStorage.setItem("gbCart",JSON.stringify(cart));
+  const btn=document.getElementById("cartBtn");
+  btn.textContent="✓ Added!"; btn.classList.add("added");
+  setTimeout(()=>{btn.textContent="Add to Cart";btn.classList.remove("added");},2000);
+}
+
+/* ── Close / Share ── */
+document.getElementById("closeBtn").addEventListener("click",()=>{
+  window.close();
+  setTimeout(()=>{if(!window.closed)history.length>1?history.back():(window.location.href="index.html");},250);
+});
+document.getElementById("shareBtn").addEventListener("click",async()=>{
+  const d={title:pName+" – Gaurab Bakery",text:`Check out ${pName}! ${pPrice}`,url:window.location.href};
+  if(navigator.share){try{await navigator.share(d);}catch(e){}}
+  else{navigator.clipboard.writeText(window.location.href).catch(()=>{});}
+});
+
+buildSlideshow();
+buildInfo();
+</script>
+</body>
+</html>
+   

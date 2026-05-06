@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Gaurab Bakery</title>
+<style>
+  /* ════ RESET & BASE ════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f0f2f5;
+    color: #1d1d1f;
+    min-height: 100vh;
+  }
+
+  /* ════ LOGIN SCREEN ════ */
+  #loginScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .login-box {
+    background: white;
+    border-radius: 24px;
+    padding: 48px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    text-align: center;
+    width: 360px;
+  }
+  .login-box .logo { font-size: 42px; margin-bottom: 8px; }
+  .login-box h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .login-box p  { color: #888; font-size: 13px; margin-bottom: 28px; }
+
+  .login-box input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid #ddd;
+    border-radius: 14px;
+    font-size: 15px;
+    margin-bottom: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: #0071e3; }
+
+  .login-box .login-btn {
+    width: 100%;
+    padding: 13px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .login-box .login-btn:hover { background: #333; }
+  .login-box .error-msg {
+    color: #e53935;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ════ ADMIN PANEL ════ */
+  #adminPanel { display: none; }
+
+  /* Top nav */
+  .admin-nav {
+    background: #111;
+    color: white;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .admin-nav .brand { font-size: 18px; font-weight: 800; flex: 1; }
+  .admin-nav .badge {
+    background: #0071e3;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .admin-nav .logout-btn {
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .admin-nav .logout-btn:hover { background: #555; }
+  .admin-nav .site-btn {
+    background: #0071e3;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+  }
+
+  /* Content wrapper */
+  .admin-body { max-width: 1100px; margin: 36px auto; padding: 0 24px 60px; }
+
+  /* ── Stats bar ── */
+  .stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 28px;
+    flex: 1;
+    min-width: 140px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .stat-card .num { font-size: 32px; font-weight: 800; }
+  .stat-card .lbl { font-size: 12px; color: #888; margin-top: 4px; }
+
+  /* ── Section headers ── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .section-head h2 { font-size: 20px; font-weight: 800; }
+
+  /* ── ADD / EDIT FORM ── */
+  .form-card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    margin-bottom: 36px;
+  }
+  .form-card h2 { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label { font-size: 13px; font-weight: 600; color: #555; }
+  .form-group input,
+  .form-group textarea {
+    padding: 11px 14px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: #0071e3; }
+
+  /* Image upload area */
+  .img-upload-area {
+    border: 2px dashed #d0d0d0;
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .img-upload-area:hover { border-color: #0071e3; background: #f0f7ff; }
+  .img-upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; border: none; padding: 0;
+  }
+  .img-upload-area .upload-icon { font-size: 28px; margin-bottom: 6px; }
+  .img-upload-area p { font-size: 13px; color: #888; margin: 0; }
+  .img-preview {
+    width: 90px; height: 90px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 10px auto 0;
+    display: none;
+    border: 2px solid #eee;
+  }
+
+  /* OR divider for image URL */
+  .or-row {
+    display: flex; align-items: center; gap: 10px; margin: 10px 0;
+    font-size: 12px; color: #aaa;
+  }
+  .or-row::before, .or-row::after { content: ""; flex: 1; border-top: 1px solid #e0e0e0; }
+
+  /* Form actions */
+  .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .btn-save {
+    background: #111; color: white; border: none;
+    border-radius: 20px; padding: 12px 28px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-save:hover { background: #333; }
+  .btn-cancel {
+    background: #eee; color: #333; border: none;
+    border-radius: 20px; padding: 12px 24px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    display: none;
+  }
+  .btn-cancel:hover { background: #ddd; }
+
+  /* ── PRODUCT TABLE ── */
+  .products-card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  }
+
+  .product-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .product-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1.5px solid #f0f0f0;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .product-row:hover { border-color: #d0d0d0; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+  .product-row img {
+    width: 70px; height: 70px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+    background: #f5f5f7;
+  }
+
+  .product-info { flex: 1; min-width: 0; }
+  .product-info .pname { font-weight: 700; font-size: 15px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-info .pdesc { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-info .pprice { font-size: 14px; font-weight: 700; color: #0071e3; margin-top: 4px; }
+
+  .product-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  .btn-edit {
+    background: #f0f7ff; color: #0071e3; border: 1.5px solid #0071e3;
+    border-radius: 20px; padding: 7px 16px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-edit:hover { background: #dceeff; }
+
+  .btn-delete {
+    background: #fff0f0; color: #e53935; border: 1.5px solid #e53935;
+    border-radius: 20px; padding: 7px 14px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-delete:hover { background: #ffe0e0; }
+
+  .empty-msg {
+    text-align: center; color: #aaa; padding: 40px 0; font-size: 15px;
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #111; color: white;
+    padding: 12px 28px; border-radius: 20px;
+    font-size: 14px; font-weight: 600;
+    opacity: 0; transition: opacity 0.3s;
+    z-index: 9999; pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">🎂</div>
+    <h1>Admin Login</h1>
+    <p>Gaurab Bakery Management</p>
+    <input type="password" id="pwdInput" placeholder="Enter admin password"
+           onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" onclick="doLogin()">Login →</button>
+    <div class="error-msg" id="errMsg">❌ Wrong password. Try again.</div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN PANEL ══════════ -->
+<div id="adminPanel">
+
+  <nav class="admin-nav">
+    <span class="brand">🎂 Gaurab Bakery Admin</span>
+    <span class="badge">ADMIN</span>
+    <a class="site-btn" href="index.html" target="_blank">View Site ↗</a>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </nav>
+
+  <div class="admin-body">
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="num" id="statTotal">0</div>
+        <div class="lbl">Total Products</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="statCart">0</div>
+        <div class="lbl">Items in Cart</div>
+      </div>
+    </div>
+
+    <!-- Add / Edit Form -->
+    <div class="form-card">
+      <h2 id="formTitle">➕ Add New Product</h2>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" id="fName" placeholder="e.g. Vanilla Cake">
+        </div>
+
+        <div class="form-group">
+          <label>Price *</label>
+          <input type="text" id="fPrice" placeholder="e.g. Rs.650">
+        </div>
+
+        <div class="form-group full">
+          <label>Short Description *</label>
+          <input type="text" id="fDesc" placeholder="e.g. Soft and fluffy vanilla cream cake">
+        </div>
+
+        <!-- Image upload OR URL -->
+        <div class="form-group full">
+          <label>Product Image</label>
+          <div class="img-upload-area" id="uploadArea">
+            <input type="file" id="fImgFile" accept="image/*" onchange="handleFileUpload(this)">
+            <div class="upload-icon">📷</div>
+            <p>Click to upload image from your computer</p>
+            <img class="img-preview" id="imgPreview" src="" alt="preview">
+          </div>
+          <div class="or-row">OR enter image filename / URL</div>
+          <input type="text" id="fImgUrl" placeholder="chocolatecake.png  or  https://...">
+        </div>
+
+        <!-- Long description for detail page -->
+        <div class="form-group full">
+          <label>Full Description (shown on detail page)</label>
+          <textarea id="fLongDesc" rows="3" placeholder="Write a longer, mouth-watering description for the product detail page..."></textarea>
+        </div>
+
+        <!-- Extra detail fields -->
+        <div class="form-group">
+          <label>Weight</label>
+          <input type="text" id="fWeight" placeholder="e.g. 1 kg">
+        </div>
+        <div class="form-group">
+          <label>Serves</label>
+          <input type="text" id="fServes" placeholder="e.g. 8 – 10 people">
+        </div>
+        <div class="form-group">
+          <label>Flavour</label>
+          <input type="text" id="fFlavour" placeholder="e.g. Vanilla & Cream">
+        </div>
+        <div class="form-group">
+          <label>Allergens</label>
+          <input type="text" id="fAllergens" placeholder="e.g. Milk, Eggs, Gluten">
+        </div>
+        <div class="form-group">
+          <label>Shelf Life</label>
+          <input type="text" id="fShelf" placeholder="e.g. 2 days room temp">
+        </div>
+        <div class="form-group">
+          <label>Customisation</label>
+          <input type="text" id="fCustom" placeholder="e.g. Available in 0.5 kg, 1 kg, 2 kg">
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-save" onclick="saveProduct()">💾 Save Product</button>
+          <button class="btn-cancel" id="cancelBtn" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product list -->
+    <div class="products-card">
+      <div class="section-head">
+        <h2>📦 All Products</h2>
+      </div>
+      <div class="product-list" id="productList"></div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div><!-- /adminPanel -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════
+   PASSWORD  –  change this to
+   whatever you want!
+════════════════════════════════ */
+const ADMIN_PASSWORD = "gaurab2026";
+
+/* ── Auth ── */
+function doLogin() {
+  const pwd = document.getElementById("pwdInput").value;
+  if (pwd === ADMIN_PASSWORD) {
+    sessionStorage.setItem("gbAdmin", "1");
+    document.getElementById("loginScreen").style.display  = "none";
+    document.getElementById("adminPanel").style.display   = "block";
+    renderPanel();
+  } else {
+    document.getElementById("errMsg").style.display = "block";
+    document.getElementById("pwdInput").value = "";
+    document.getElementById("pwdInput").focus();
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem("gbAdmin");
+  document.getElementById("loginScreen").style.display  = "flex";
+  document.getElementById("adminPanel").style.display   = "none";
+  document.getElementById("pwdInput").value = "";
+}
+
+/* Auto-login if already authenticated this session */
+if (sessionStorage.getItem("gbAdmin") === "1") {
+  document.getElementById("loginScreen").style.display  = "none";
+  document.getElementById("adminPanel").style.display   = "block";
+}
+
+/* ── Data helpers ── */
+const DEFAULT_PRODUCTS = [
+  { name:"Chocolate Cake",    desc:"Rich chocolate layered soft cake",     price:"Rs.700", img:"chocolatecake.png"    },
+  { name:"Strawberry Cake",   desc:"Fresh cream strawberry delight",        price:"Rs.600", img:"strawberrycake.png"   },
+  { name:"ButterScotch Cake", desc:"Buttery cake with rich caramel flavor", price:"Rs.600", img:"butterscotchcake.png" },
+  { name:"BarbieDoll Cake",   desc:"Sweet and creamy barbiedoll cake",      price:"Rs.600", img:"barbiedollcake.png"   }
+];
+
+function getProducts() {
+  const s = localStorage.getItem("gbProducts");
+  if (s) return JSON.parse(s);
+  localStorage.setItem("gbProducts", JSON.stringify(DEFAULT_PRODUCTS));
+  return DEFAULT_PRODUCTS;
+}
+function saveProducts(arr) {
+  localStorage.setItem("gbProducts", JSON.stringify(arr));
+}
+
+function getExtras() {
+  const s = localStorage.getItem("gbExtras");
+  return s ? JSON.parse(s) : {};
+}
+function saveExtras(obj) {
+  localStorage.setItem("gbExtras", JSON.stringify(obj));
+}
+
+/* ── Render panel ── */
+function renderPanel() {
+  const products = getProducts();
+  const cart     = JSON.parse(localStorage.getItem("cart") || "[]");
+
+  document.getElementById("statTotal").textContent = products.length;
+  document.getElementById("statCart").textContent  = cart.length;
+
+  const list = document.getElementById("productList");
+  if (products.length === 0) {
+    list.innerHTML = '<div class="empty-msg">No products yet. Add your first one above!</div>';
+    return;
+  }
+
+  list.innerHTML = products.map((p, i) => `
+    <div class="product-row">
+      <img src="${p.img}" onerror="this.style.background='#eee'" alt="${p.name}">
+      <div class="product-info">
+        <div class="pname">${p.name}</div>
+        <div class="pdesc">${p.desc}</div>
+        <div class="pprice">${p.price}</div>
+      </div>
+      <div class="product-actions">
+        <button class="btn-edit"   onclick="startEdit(${i})">✏️ Edit</button>
+        <button class="btn-delete" onclick="deleteProduct(${i})">🗑 Delete</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ── Image upload → base64 ── */
+let uploadedBase64 = "";
+
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    uploadedBase64 = e.target.result; // base64 data URL
+    const preview = document.getElementById("imgPreview");
+    preview.src   = uploadedBase64;
+    preview.style.display = "block";
+    document.getElementById("fImgUrl").value = "";
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── Save product (add or update) ── */
+let editIndex = -1;
+
+function saveProduct() {
+  const name  = document.getElementById("fName").value.trim();
+  const desc  = document.getElementById("fDesc").value.trim();
+  const price = document.getElementById("fPrice").value.trim();
+
+  // Image: prefer uploaded file, then URL field
+  let img = uploadedBase64 || document.getElementById("fImgUrl").value.trim();
+  if (!img && editIndex >= 0) img = getProducts()[editIndex].img; // keep old image on edit
+
+  if (!name || !desc || !price) { showToast("⚠️ Name, description and price are required!"); return; }
+
+  const products = getProducts();
+  const extras   = getExtras();
+
+  const product = { name, desc, price, img: img || "placeholder.png" };
+
+  // Extra details for product.html
+  const extra = {
+    longDesc: document.getElementById("fLongDesc").value.trim() || desc,
+    details: {
+      "Weight"        : document.getElementById("fWeight").value.trim(),
+      "Serves"        : document.getElementById("fServes").value.trim(),
+      "Flavour"       : document.getElementById("fFlavour").value.trim(),
+      "Allergens"     : document.getElementById("fAllergens").value.trim(),
+      "Shelf Life"    : document.getElementById("fShelf").value.trim(),
+      "Customisation" : document.getElementById("fCustom").value.trim()
+    },
+    gallery: img ? [img, img, img, img] : []
+  };
+  // Remove empty detail rows
+  Object.keys(extra.details).forEach(k => { if (!extra.details[k]) delete extra.details[k]; });
+
+  if (editIndex >= 0) {
+    products[editIndex] = product;
+    extras[name]        = extra;
+    // If name changed, remove old extra key
+    showToast("✅ Product updated!");
+  } else {
+    products.push(product);
+    extras[name] = extra;
+    showToast("✅ Product added!");
+  }
+
+  saveProducts(products);
+  saveExtras(extras);
+  clearForm();
+  renderPanel();
+}
+
+/* ── Edit ── */
+function startEdit(i) {
+  const products = getProducts();
+  const extras   = getExtras();
+  const p        = products[i];
+  const ex       = extras[p.name] || {};
+
+  editIndex = i;
+  document.getElementById("formTitle").textContent  = "✏️ Edit Product";
+  document.getElementById("cancelBtn").style.display = "inline-block";
+
+  document.getElementById("fName").value  = p.name;
+  document.getElementById("fDesc").value  = p.desc;
+  document.getElementById("fPrice").value = p.price;
+  document.getElementById("fImgUrl").value = p.img.startsWith("data:") ? "" : p.img;
+
+  if (p.img.startsWith("data:")) {
+    uploadedBase64 = p.img;
+    const preview = document.getElementById("imgPreview");
+    preview.src   = p.img;
+    preview.style.display = "block";
+  }
+
+  document.getElementById("fLongDesc").value  = ex.longDesc  || "";
+  const d = ex.details || {};
+  document.getElementById("fWeight").value    = d["Weight"]         || "";
+  document.getElementById("fServes").value    = d["Serves"]         || "";
+  document.getElementById("fFlavour").value   = d["Flavour"]        || "";
+  document.getElementById("fAllergens").value = d["Allergens"]      || "";
+  document.getElementById("fShelf").value     = d["Shelf Life"]     || "";
+  document.getElementById("fCustom").value    = d["Customisation"]  || "";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function cancelEdit() { clearForm(); }
+
+function clearForm() {
+  editIndex = -1;
+  uploadedBase64 = "";
+  document.getElementById("formTitle").textContent   = "➕ Add New Product";
+  document.getElementById("cancelBtn").style.display = "none";
+  ["fName","fDesc","fPrice","fImgUrl","fLongDesc",
+   "fWeight","fServes","fFlavour","fAllergens","fShelf","fCustom"]
+    .forEach(id => document.getElementById(id).value = "");
+  const preview = document.getElementById("imgPreview");
+  preview.src = ""; preview.style.display = "none";
+  document.getElementById("fImgFile").value = "";
+}
+
+/* ── Delete ── */
+function deleteProduct(i) {
+  if (!confirm("Delete this product? This cannot be undone.")) return;
+  const products = getProducts();
+  const extras   = getExtras();
+  const name     = products[i].name;
+  products.splice(i, 1);
+  delete extras[name];
+  saveProducts(products);
+  saveExtras(extras);
+  renderPanel();
+  showToast("🗑 Product deleted.");
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+/* ── Init ── */
+if (sessionStorage.getItem("gbAdmin") === "1") renderPanel();
+</script>
+</body>
+</html> 
+  
