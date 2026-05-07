@@ -458,15 +458,31 @@ function doLogout() {
 if (sessionStorage.getItem("gbAdmin") === "1") {
   document.getElementById("loginScreen").style.display  = "none";
   document.getElementById("adminPanel").style.display   = "block";
+  renderPanel();
 }
 
 /* ── Data helpers ── */
 const DEFAULT_PRODUCTS = [
-  { name:"Chocolate Cake",    desc:"Rich chocolate layered soft cake",     price:"Rs.700", img:"chocolatecake.png"    },
-  { name:"Strawberry Cake",   desc:"Fresh cream strawberry delight",        price:"Rs.600", img:"strawberrycake.png"   },
-  { name:"ButterScotch Cake", desc:"Buttery cake with rich caramel flavor", price:"Rs.600", img:"butterscotchcake.png" },
-  { name:"BarbieDoll Cake",   desc:"Sweet and creamy barbiedoll cake",      price:"Rs.600", img:"barbiedollcake.png"   }
+  { name:"Chocolate Cake",    desc:"Rich chocolate layered soft cake",        price:"Rs.700", img:"chocolatecake.png"    },
+  { name:"Strawberry Cake",   desc:"Fresh cream strawberry delight",           price:"Rs.600", img:"strawberrycake.png"   },
+  { name:"ButterScotch Cake", desc:"Buttery cake with rich caramel flavor",    price:"Rs.600", img:"butterscotchcake.png" },
+  { name:"BarbieDoll Cake",   desc:"Sweet and creamy barbiedoll cake",         price:"Rs.600", img:"barbiedollcake.png"   },
+  { name:"Vanilla Cake",      desc:"Classic soft and fluffy vanilla sponge",   price:"Rs.550", img:"vanillacake.png"      },
+  { name:"Black Forest",      desc:"Chocolate sponge with cream and cherries", price:"Rs.750", img:"blackforestcake.png"  },
+  { name:"White Forest",      desc:"White chocolate sponge with fresh cream",  price:"Rs.700", img:"whiteforestcake.png"  },
+  { name:"Blueberry Cake",    desc:"Soft cake topped with fresh blueberries",  price:"Rs.650", img:"blueberrycake.png"    }
 ];
+
+const DEFAULT_EXTRAS = {
+  "Chocolate Cake":    { longDesc:"Dive into pure indulgence with our Chocolate Cake — rich layers of moist dark chocolate sponge filled with velvety chocolate ganache and topped with a glossy chocolate glaze. Baked fresh daily with premium cocoa.", details:{"Flavour":"Dark Chocolate & Ganache","Shelf Life":"2 days refrigerated","Serves":"8–10 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["chocolatecake.png"] },
+  "Strawberry Cake":   { longDesc:"Fresh, fruity and utterly delightful — our Strawberry Cake layers soft vanilla sponge with luscious strawberry cream and fresh strawberry slices. Crowned with whipped cream rosettes and glazed berries.", details:{"Flavour":"Strawberry & Fresh Cream","Shelf Life":"2 days refrigerated","Serves":"8–10 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["strawberrycake.png"] },
+  "ButterScotch Cake": { longDesc:"Rich, buttery and irresistibly golden — our ButterScotch Cake is loaded with smooth caramel-toffee cream between tender sponge layers, drizzled with warm butterscotch sauce and finished with crunchy caramel bits.", details:{"Flavour":"Butterscotch & Caramel Toffee","Shelf Life":"2 days refrigerated","Serves":"8–10 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["butterscotchcake.png"] },
+  "BarbieDoll Cake":   { longDesc:"Make her day magical with our BarbieDoll Cake — a dreamy pink layered cake sculpted around a doll figure, adorned with rosette swirls, edible pearls and pastel frosting. The ultimate celebration cake for little ones.", details:{"Flavour":"Vanilla & Rose Cream","Shelf Life":"2 days refrigerated","Serves":"10–14 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["barbiedollcake.png"] },
+  "Vanilla Cake":      { longDesc:"Our signature Vanilla Cake is a timeless classic — a cloud-soft sponge baked with pure Madagascar vanilla essence, frosted with silky smooth vanilla buttercream. Simple, elegant and always a crowd favourite.", details:{"Flavour":"Pure Madagascar Vanilla","Shelf Life":"2 days room temperature","Serves":"8–10 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["vanillacake.png"] },
+  "Black Forest":      { longDesc:"Indulge in our classic Black Forest Cake — moist chocolate sponge layers soaked in cherry syrup, filled with hand-whipped cream and topped with dark chocolate shavings and glazed cherries. A timeless European masterpiece.", details:{"Flavour":"Dark Chocolate & Cherry","Shelf Life":"2 days refrigerated","Serves":"8–10 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["blackforestcake.png"] },
+  "White Forest":      { longDesc:"Our White Forest Cake is a delicate masterpiece — light white chocolate sponge layered with silky whipped cream, white chocolate curls and fresh cherries. Elegant, creamy and irresistibly soft.", details:{"Flavour":"White Chocolate & Fresh Cream","Shelf Life":"2 days refrigerated","Serves":"8–10 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["whiteforestcake.png"] },
+  "Blueberry Cake":    { longDesc:"A burst of freshness in every bite — our Blueberry Cake features a soft vanilla sponge generously topped with luscious blueberry compote and fresh whole blueberries. Perfectly balanced between sweet and tangy.", details:{"Flavour":"Fresh Blueberry & Vanilla","Shelf Life":"2 days refrigerated","Serves":"8–10 people","Allergens":"Milk, Eggs, Gluten"}, gallery:["blueberrycake.png"] }
+};
 
 function getProducts() {
   const s = localStorage.getItem("gbProducts");
@@ -480,7 +496,9 @@ function saveProducts(arr) {
 
 function getExtras() {
   const s = localStorage.getItem("gbExtras");
-  return s ? JSON.parse(s) : {};
+  if (s) return JSON.parse(s);
+  localStorage.setItem("gbExtras", JSON.stringify(DEFAULT_EXTRAS));
+  return DEFAULT_EXTRAS;
 }
 function saveExtras(obj) {
   localStorage.setItem("gbExtras", JSON.stringify(obj));
@@ -489,7 +507,7 @@ function saveExtras(obj) {
 /* ── Render panel ── */
 function renderPanel() {
   const products = getProducts();
-  const cart     = JSON.parse(localStorage.getItem("cart") || "[]");
+  const cart     = JSON.parse(localStorage.getItem("gbCart") || "[]");
 
   document.getElementById("statTotal").textContent = products.length;
   document.getElementById("statCart").textContent  = cart.length;

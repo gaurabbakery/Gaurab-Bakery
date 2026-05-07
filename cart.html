@@ -64,6 +64,16 @@
   .item-weight { font-size: 12px; color: #999; margin-bottom: 4px; }
   .item-price  { font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 8px; }
 
+  /* Inline weight selector */
+  .item-weight-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+  .item-w-btn {
+    padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 600;
+    border: 1.5px solid #ddd; background: #fff; color: #555; cursor: pointer;
+    transition: all .15s;
+  }
+  .item-w-btn:hover  { border-color: #888; }
+  .item-w-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
   /* Qty controls */
   .qty-ctrl {
     display: inline-flex; align-items: center;
@@ -295,6 +305,13 @@ function setQty(i, n) {
   saveCart(c); render();
 }
 
+/* ── Weight ── */
+function setWeight(i, lbs) {
+  const c=getCart();
+  c[i].lbs = lbs;
+  saveCart(c); render();
+}
+
 /* ── Remove item ── */
 function removeItem(i) {
   const c=getCart(); c.splice(i,1); saveCart(c); render();
@@ -402,14 +419,21 @@ function render() {
     return;
   }
 
-  const items=cart.map((c,i)=>`
+  const items=cart.map((c,i)=>{
+    const lbs = c.lbs || 1;
+    const base = c.basePrice || parsePrice(c.price);
+    const itemTotal = base * lbs * (c.qty||1);
+    const weightBtns = [1,2,3,4,5].map(lb=>
+      `<button class="item-w-btn${lbs===lb?' active':''}" onclick="setWeight(${i},${lb})">${lb}lb</button>`
+    ).join('');
+    return `
     <div class="cart-item">
       <img src="${c.img}" alt="${c.name}"
         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22><rect fill=%22%23f5f5f5%22 width=%2280%22 height=%2280%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2232%22>🎂</text></svg>'">
       <div class="item-info">
         <div class="item-name">${c.name}</div>
-        ${c.weight?`<div class="item-weight">⚖️ ${c.weight}</div>`:""}
-        <div class="item-price">${c.price}</div>
+        <div class="item-weight-row">${weightBtns}</div>
+        <div class="item-price">Rs.${itemTotal}</div>
         <div class="qty-ctrl">
           <button class="qty-btn" onclick="setQty(${i},${(c.qty||1)-1})">−</button>
           <input  class="qty-num" type="number" value="${c.qty||1}" min="1" max="99"
@@ -421,9 +445,10 @@ function render() {
         <button class="remove-btn" onclick="removeItem(${i})">✕</button>
         <button class="item-order-btn" onclick="openItemOrderPopup(${i})">Order Now</button>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 
-  const sub  =cart.reduce((s,c)=>s+parsePrice(c.price)*(c.qty||1),0);
+  const sub  =cart.reduce((s,c)=>s+((c.basePrice||parsePrice(c.price))*(c.lbs||1)*(c.qty||1)),0);
   const count=cart.reduce((s,c)=>s+(c.qty||1),0);
 
   body.innerHTML=`
@@ -433,8 +458,7 @@ function render() {
       <div class="summary-row"><span>Items (${count})</span><span>Rs.${sub}</span></div>
       <div class="summary-row total"><span>Total</span><span>Rs.${sub}</span></div>
       <div class="cart-actions">
-        <button class="btn-order-all" onclick="orderAll()">📲 Order All via WhatsApp</button>
-        <button class="btn-clear"     onclick="clearCart()">🗑 Clear Cart</button>
+        <button class="btn-clear" onclick="clearCart()">🗑 Clear Cart</button>
       </div>
       <div class="secure-note">🔒 Order sent securely via WhatsApp</div>
     </div>`;

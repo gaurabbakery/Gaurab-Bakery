@@ -150,7 +150,7 @@
   .qty-num::-webkit-inner-spin-button,
   .qty-num::-webkit-outer-spin-button { -webkit-appearance:none; }
 
-  /* Action buttons — reuse style.css classes */
+  /* Action buttons */
   .action-row { display:flex; gap:10px; }
   .action-row .order,
   .action-row .cart {
@@ -170,7 +170,7 @@
     padding:7px 12px; font-size:11px; font-weight:600; color:#555;
   }
 
-  /* ── Same Order Popup as home page ── */
+  /* ── Order Popup ── */
   #pd-overlay {
     display:none; position:fixed; inset:0; z-index:9999;
     background:rgba(0,0,0,0.55);
@@ -199,6 +199,23 @@
   }
   #pd-popup .pop-w-btn:hover  { border-color:#888; }
   #pd-popup .pop-w-btn.active { background:#1a1a1a; color:#fff; border-color:#1a1a1a; }
+
+  /* Quantity row inside popup */
+  #pd-popup .pop-qty-row {
+    display:flex; align-items:center; margin-bottom:16px;
+    border:1.5px solid #e0e0e0; border-radius:20px; overflow:hidden;
+    width:fit-content;
+  }
+  #pd-popup .pop-qty-btn {
+    background:none; border:none; width:38px; height:38px;
+    font-size:22px; font-weight:300; cursor:pointer; color:#1d1d1f;
+    display:flex; align-items:center; justify-content:center; transition:background .15s;
+  }
+  #pd-popup .pop-qty-btn:hover { background:#f5f5f5; }
+  #pd-popup .pop-qty-num {
+    min-width:38px; text-align:center; font-size:15px; font-weight:800; color:#1a1a1a;
+  }
+
   #pd-popup .pop-price-box {
     background:#f8f8f8; border-radius:13px;
     padding:13px 16px; margin-bottom:18px;
@@ -248,7 +265,7 @@
   <div class="info-col" id="infoCol"></div>
 </div>
 
-<!-- Order Popup (identical to home page popup) -->
+<!-- Order Popup -->
 <div id="pd-overlay">
   <div id="pd-popup">
     <img class="pop-img" id="pdPopImg" src="" alt="">
@@ -256,6 +273,12 @@
     <div class="pop-note" id="pdPopNote"></div>
     <div class="pop-lbl">Select Weight</div>
     <div class="pop-weights" id="pdPopWeights"></div>
+    <div class="pop-lbl">Quantity</div>
+    <div class="pop-qty-row">
+      <button class="pop-qty-btn" onclick="changePdPopQty(-1)">−</button>
+      <span class="pop-qty-num" id="pdPopQtyNum">1</span>
+      <button class="pop-qty-btn" onclick="changePdPopQty(1)">+</button>
+    </div>
     <div class="pop-price-box">
       <div class="pop-price-lbl">Total Price</div>
       <div class="pop-price-val" id="pdPopPrice"></div>
@@ -283,7 +306,7 @@ document.addEventListener("click", e => {
   setTimeout(() => circle.remove(), 560);
 });
 
-/* ── FIXED parsePrice: grabs first integer from string ── */
+/* ── parsePrice ── */
 function parsePrice(s) {
   const m = String(s || "").match(/\d+/);
   return m ? parseInt(m[0], 10) : 0;
@@ -291,14 +314,14 @@ function parsePrice(s) {
 
 /* ── Product data ── */
 const BUILTIN = {
-  "Chocolate Cake"   :{ longDesc:"Our Chocolate Cake is a dream for every choco-lover. Layers of moist, dark-chocolate sponge are filled with velvety ganache and finished with a glossy chocolate mirror glaze. Every bite is rich, indulgent, and deeply satisfying.", details:{"Flavour":"Dark Chocolate","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["chocolatecake1.png","chocolatecake2.png","chocolatecake3.png"] },
-  "Strawberry Cake"  :{ longDesc:"A celebration of fresh berries and light cream! Fluffy vanilla sponge layered with clouds of whipped fresh cream and slices of ripe, hand-picked strawberries. Light, airy, and bursting with natural fruit flavour.", details:{"Flavour":"Fresh Cream & Strawberry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["strawberrycake.png"] },
-  "ButterScotch Cake":{ longDesc:"Warm, buttery, and irresistibly caramel — the ultimate comfort dessert. Golden sponge layers soaked in butterscotch syrup, frosted with silky caramel buttercream, and topped with crunchy butterscotch chips.", details:{"Flavour":"Butterscotch & Caramel","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["butterscotchcake1.png","butterscotchcake2.png","butterscotchcake3.png","butterscotchcake4.png"] },
-  "BarbieDoll Cake"  :{ longDesc:"A showstopper for every princess! Delicate vanilla-rose sponge sculpted into a gorgeous doll-dress shape, decorated with pastel fondant ruffles and edible pearls. The Barbie figurine stands tall at the centre.", details:{"Flavour":"Vanilla Rose","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["barbiedollcake.png"] },
-  "Vanilla Cake"     :{ longDesc:"A timeless classic beloved by all ages. Made with pure vanilla and the finest butter, creating a soft, airy sponge with a delicate fragrance. Frosted with silky smooth vanilla buttercream.", details:{"Flavour":"Pure Vanilla & Buttercream","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["vanillacake.png"] },
-  "Black Forest Cake"     :{ longDesc:"The legendary Black Forest — layers of rich dark chocolate sponge soaked in cherry syrup, filled with luscious whipped cream and whole cherries, then finished with chocolate shavings and a cherry on top.", details:{"Flavour":"Dark Chocolate & Cherry Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blackforest1.png","blackforest2.png","blackforest3.png"] },
-  "White Forest Cake"     :{ longDesc:"An elegant twist on the classic forest cake. Delicate white chocolate sponge layered with smooth white chocolate cream and juicy cherries, topped with white chocolate curls.", details:{"Flavour":"White Chocolate & Cherry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["whiteforest.png"] },
-  "Blueberry Cake"   :{ longDesc:"Fresh, fruity, and wonderfully fragrant. Soft vanilla sponge loaded with plump fresh blueberries, layered with blueberry compote and topped with a generous mound of cream and fresh berries.", details:{"Flavour":"Blueberry & Vanilla Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blueberry.png"] }
+  "Chocolate Cake"   :{ longDesc:"Our Chocolate Cake is a dream for every choco-lover. Layers of moist, dark-chocolate sponge are filled with velvety ganache and finished with a glossy chocolate mirror glaze. Every bite is rich, indulgent, and deeply satisfying.", details:{"Flavour":"Dark Chocolate ","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["chocolatecake.png","chocolatecake.png","chocolatecake.png"] },
+  "Strawberry Cake"  :{ longDesc:"A celebration of fresh berries and light cream! Fluffy vanilla sponge layered with clouds of whipped fresh cream and slices of ripe, hand-picked strawberries. Light, airy, and bursting with natural fruit flavour.", details:{"Flavour":"Fresh Cream & Strawberry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["strawberrycake.png","strawberrycake.png","strawberrycake.png"] },
+  "ButterScotch Cake":{ longDesc:"Warm, buttery, and irresistibly caramel — the ultimate comfort dessert. Golden sponge layers soaked in butterscotch syrup, frosted with silky caramel buttercream, and topped with crunchy butterscotch chips.", details:{"Flavour":"Butterscotch & Caramel","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["butterscotchcake.png","butterscotchcake.png","butterscotchcake.png"] },
+  "BarbieDoll Cake"  :{ longDesc:"A showstopper for every princess! Delicate vanilla-rose sponge sculpted into a gorgeous doll-dress shape, decorated with pastel fondant ruffles and edible pearls. The Barbie figurine stands tall at the centre.", details:{"Flavour":"Vanilla Rose","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["barbiedollcake.png","barbiedollcake.png","barbiedollcake.png"] },
+  "Vanilla Cake"     :{ longDesc:"A timeless classic beloved by all ages. Made with pure vanilla and the finest butter, creating a soft, airy sponge with a delicate fragrance. Frosted with silky smooth vanilla buttercream.", details:{"Flavour":"Pure Vanilla & Buttercream","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["vanillacake.png","vanillacake.png","vanillacake.png"] },
+  "Black Forest"     :{ longDesc:"The legendary Black Forest — layers of rich dark chocolate sponge soaked in cherry syrup, filled with luscious whipped cream and whole cherries, then finished with chocolate shavings and a cherry on top.", details:{"Flavour":"Dark Chocolate & Cherry Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blackforestcake.png","blackforestcake.png","blackforestcake.png"] },
+  "White Forest"     :{ longDesc:"An elegant twist on the classic forest cake. Delicate white chocolate sponge layered with smooth white chocolate cream and juicy cherries, topped with white chocolate curls.", details:{"Flavour":"White Chocolate & Cherry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["whiteforestcake.png","whiteforestcake.png","whiteforestcake.png"] },
+  "Blueberry Cake"   :{ longDesc:"Fresh, fruity, and wonderfully fragrant. Soft vanilla sponge loaded with plump fresh blueberries, layered with blueberry compote and topped with a generous mound of cream and fresh berries.", details:{"Flavour":"Blueberry & Vanilla Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blueberrycake.png","blueberrycake.png","blueberrycake.png"] }
 };
 
 const WEIGHTS = [
@@ -317,7 +340,7 @@ const pName   = P.get("name")  || "";
 const pDesc   = P.get("desc")  || "";
 const pPrice  = P.get("price") || "";
 const pImg    = P.get("img")   || "";
-const baseAmt = parsePrice(pPrice);   /* e.g. "Rs.700" → 700 */
+const baseAmt = parsePrice(pPrice);
 
 const extra  = extraDetails[pName] || { longDesc:pDesc, details:{}, gallery:[pImg] };
 const images = extra.gallery?.length ? extra.gallery : [pImg];
@@ -329,7 +352,7 @@ let selectedWeight = WEIGHTS[0];
 function updatePagePrice() {
   const el = document.getElementById("livePrice");
   if (!el) return;
-  el.textContent     = `Rs.${baseAmt * selectedWeight.lbs}`;
+  el.textContent     = `Rs.${baseAmt * selectedWeight.lbs * qty}`;
   el.style.transform = "scale(1.12)";
   setTimeout(() => el.style.transform = "scale(1)", 180);
   const note = document.getElementById("weightNote");
@@ -347,23 +370,40 @@ function setQty(n) {
   qty = Math.max(1, Math.min(99, parseInt(n)||1));
   const el = document.getElementById("qtyNum");
   if (el) el.value = qty;
+  updatePagePrice();
 }
 
 /* ── Slideshow ── */
 let current=0, autoTimer;
+
+function updateArrows() {
+  const left  = document.getElementById("arrowLeft");
+  const right = document.getElementById("arrowRight");
+  if (images.length <= 1) {
+    /* Only one image — hide both arrows completely */
+left.style.display  = "none";
+    right.style.display = "none";
+  } else {
+    left.style.display  = current === 0                  ? "none" : "flex";
+    right.style.display = current === images.length - 1  ? "none" : "flex";
+  }
+}
+
 function updateSlide() {
   document.getElementById("slidesTrack").style.transform=`translateX(-${current*100}%)`;
   document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("active",i===current));
   document.querySelectorAll(".thumb").forEach((t,i)=>t.classList.toggle("active",i===current));
   document.getElementById("slideCounter").textContent=`${current+1} / ${images.length}`;
+  updateArrows();
 }
+
 function goTo(i)    { current=(i+images.length)%images.length; updateSlide(); }
 function resetAuto(){ clearInterval(autoTimer); autoTimer=setInterval(()=>goTo(current+1),3800); }
 
 function buildSlideshow() {
   const track=document.getElementById("slidesTrack");
   const dotsEl=document.getElementById("dots");
-  const thumbs=document.getElementById("thumbs");
+  const thumbsEl=document.getElementById("thumbs");
   images.forEach((src,i)=>{
     const sl=document.createElement("div"); sl.className="slide";
     sl.innerHTML=`<img src="${src}" alt="${pName}" loading="${i===0?'eager':'lazy'}" onerror="this.style.background='#f0f0f0'">`;
@@ -372,7 +412,7 @@ function buildSlideshow() {
     dot.onclick=()=>{goTo(i);resetAuto();}; dotsEl.appendChild(dot);
     const th=document.createElement("div"); th.className="thumb"+(i===0?" active":"");
     th.innerHTML=`<img src="${src}" alt="photo ${i+1}">`;
-    th.onclick=()=>{goTo(i);resetAuto();}; thumbs.appendChild(th);
+    th.onclick=()=>{goTo(i);resetAuto();}; thumbsEl.appendChild(th);
   });
   document.getElementById("arrowLeft").onclick =()=>{goTo(current-1);resetAuto();};
   document.getElementById("arrowRight").onclick=()=>{goTo(current+1);resetAuto();};
@@ -381,7 +421,8 @@ function buildSlideshow() {
   ms.addEventListener("touchend",e=>{const d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>40){goTo(d>0?current+1:current-1);resetAuto();}},{passive:true});
   ms.addEventListener("mousedown",e=>{sx=e.clientX;});
   ms.addEventListener("mouseup",e=>{if(Math.abs(sx-e.clientX)>40){goTo(sx-e.clientX>0?current+1:current-1);resetAuto();}});
-  updateSlide(); resetAuto();
+  updateSlide();
+  resetAuto();
 }
 
 /* ── Build info ── */
@@ -412,52 +453,59 @@ function buildInfo() {
       </div>
     </div>
     <div class="action-row">
-      <button class="order" onclick="openPdPopup()">Order Now</button>
-      <button class="cart"  id="cartBtn" onclick="addToCartPage()">Add to Cart</button>
+      <button class="order" onclick="openPdPopup()">Buy Now</button>
+      <button class="cart"  id="addCartBtn" onclick="addToCartPd()">Add to Cart</button>
     </div>
     <div class="trust-row">
-      <span class="trust-badge">🎂 Fresh Daily</span>
-      <span class="trust-badge">✨ Custom Orders</span>
-    </div>`;
-  document.getElementById("topTitle").textContent=pName;
-  document.title=pName+" – Gaurab Bakery";
+      <div class="trust-badge">✅ Fresh Daily</div>
+      <div class="trust-badge">📲 Order via WhatsApp</div>
+    </div>
+  `;
 }
 
-/* ── Popup (same as home page) ── */
+/* ── Order Popup ── */
 let _pdPopWeight = WEIGHTS[0];
+let _pdPopQty    = 1;
 
 function openPdPopup() {
-  /* pre-select whatever weight is chosen on the page */
+  /* Start popup weight at current page selection, qty at current page qty */
   _pdPopWeight = selectedWeight;
+  _pdPopQty    = qty;
 
   document.getElementById("pdPopImg").src          = pImg;
-  document.getElementById("pdPopImg").alt          = pName;
   document.getElementById("pdPopName").textContent = pName;
   document.getElementById("pdPopNote").textContent = `Rs.${baseAmt} per pound`;
+  document.getElementById("pdPopQtyNum").textContent = String(_pdPopQty);
 
+  const activeIdx = WEIGHTS.indexOf(_pdPopWeight);
   document.getElementById("pdPopWeights").innerHTML = WEIGHTS.map((w,i)=>
-    `<button class="pop-w-btn${w.label===_pdPopWeight.label?" active":""}"
-             onclick="selectPdPopWeight(${i})">${w.label}</button>`
+    `<button class="pop-w-btn${i===activeIdx?" active":""}" onclick="selectPdPopWeight(${i})">${w.label}</button>`
   ).join("");
 
-  refreshPdPopPrice();
+  refreshPdPrice();
   document.getElementById("pd-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
 }
 
 function selectPdPopWeight(idx) {
   _pdPopWeight = WEIGHTS[idx];
-  document.querySelectorAll("#pdPopWeights .pop-w-btn").forEach((b,i)=>
-    b.classList.toggle("active",i===idx));
-  refreshPdPopPrice();
+  document.querySelectorAll("#pdPopWeights .pop-w-btn").forEach((b,i) =>
+    b.classList.toggle("active", i===idx));
+  refreshPdPrice();
 }
 
-function refreshPdPopPrice() {
-  const total = baseAmt * _pdPopWeight.lbs;
+function changePdPopQty(delta) {
+  _pdPopQty = Math.max(1, Math.min(99, _pdPopQty + delta));
+  document.getElementById("pdPopQtyNum").textContent = String(_pdPopQty);
+  refreshPdPrice();
+}
+
+function refreshPdPrice() {
+  const total = baseAmt * _pdPopWeight.lbs * _pdPopQty;
   const el    = document.getElementById("pdPopPrice");
   el.textContent     = `Rs.${total}`;
   el.style.transform = "scale(1.12)";
-  setTimeout(()=>el.style.transform="scale(1)",180);
+  setTimeout(() => el.style.transform = "scale(1)", 180);
 }
 
 function closePdPopup() {
@@ -466,50 +514,51 @@ function closePdPopup() {
 }
 
 function confirmPdPopup() {
-  const total = baseAmt * _pdPopWeight.lbs;
+  const total = baseAmt * _pdPopWeight.lbs * _pdPopQty;
   const text  =
     `Hello! I want to order from Gaurab Bakery:\n\n`+
-    `🎂 Cake    : ${pName}\n`+
-    `⚖️ Weight  : ${_pdPopWeight.label}\n`+
-    `🔢 Quantity: ${qty}\n`+
-    `💰 Price   : Rs.${total}\n\n`+
+    `🎂 Cake     : ${pName}\n`+
+    `⚖️ Weight   : ${_pdPopWeight.label}\n`+
+    `🔢 Quantity : ${_pdPopQty}\n`+
+    `💰 Price    : Rs.${total}\n\n`+
     `Please confirm my order. Thank you!`;
   window.open(`https://wa.me/9779860228877?text=${encodeURIComponent(text)}`);
   closePdPopup();
 }
 
-document.getElementById("pd-overlay").addEventListener("click",function(e){
-  if(e.target===this)closePdPopup();
+document.getElementById("pd-overlay").addEventListener("click", function(e){
+  if (e.target === this) closePdPopup();
 });
 
 /* ── Add to Cart ── */
-function addToCartPage() {
-  const total = baseAmt * selectedWeight.lbs;
-  const cart  = JSON.parse(localStorage.getItem("gbCart")||"[]");
-  const key   = pName+"|"+selectedWeight.label;
-  const ex    = cart.find(c=>(c.name+"|"+(c.weight||""))===key);
-  if(ex) ex.qty=(ex.qty||1)+qty;
-  else   cart.push({name:pName,desc:pDesc,price:"Rs."+total,img:pImg,weight:selectedWeight.label,basePrice:baseAmt,qty});
-  localStorage.setItem("gbCart",JSON.stringify(cart));
-  const btn=document.getElementById("cartBtn");
-  btn.textContent="✓ Added!"; btn.classList.add("added");
-  setTimeout(()=>{btn.textContent="Add to Cart";btn.classList.remove("added");},2000);
+function addToCartPd() {
+  const cart = JSON.parse(localStorage.getItem("gbCart") || "[]");
+  const ex   = cart.find(c => c.name === pName);
+  if (ex) ex.qty = (ex.qty||1) + qty;
+  else    cart.push({ name:pName, desc:pDesc, price:pPrice, img:pImg, qty, lbs:selectedWeight.lbs, basePrice:baseAmt });
+  localStorage.setItem("gbCart", JSON.stringify(cart));
+  const btn = document.getElementById("addCartBtn");
+  btn.textContent = "✓ Added";
+  btn.classList.add("added");
+  setTimeout(() => { btn.textContent = "Add to Cart"; btn.classList.remove("added"); }, 1800);
 }
 
-/* ── Close / Share ── */
-document.getElementById("closeBtn").addEventListener("click",()=>{
-  window.close();
-  setTimeout(()=>{if(!window.closed)history.length>1?history.back():(window.location.href="index.html");},250);
-});
-document.getElementById("shareBtn").addEventListener("click",async()=>{
-  const d={title:pName+" – Gaurab Bakery",text:`Check out ${pName}! ${pPrice}`,url:window.location.href};
-  if(navigator.share){try{await navigator.share(d);}catch(e){}}
-  else{navigator.clipboard.writeText(window.location.href).catch(()=>{});}
-});
+/* ── Top bar ── */
+document.getElementById("topTitle").textContent = pName || "Gaurab Bakery";
+document.getElementById("closeBtn").onclick = () => window.close() || history.back();
+document.getElementById("shareBtn").onclick = () => {
+  if (navigator.share) {
+    navigator.share({ title: pName, text: `Check out ${pName} at Gaurab Bakery!`, url: location.href });
+  } else {
+    navigator.clipboard?.writeText(location.href);
+    document.getElementById("shareBtn").textContent = "✅ Copied!";
+    setTimeout(() => document.getElementById("shareBtn").textContent = "📤 Share", 2000);
+  }
+};
 
+/* ── Init ── */
 buildSlideshow();
 buildInfo();
 </script>
 </body>
 </html>
-   
