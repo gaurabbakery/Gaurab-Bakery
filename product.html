@@ -66,17 +66,6 @@
     background: rgba(0,0,0,0.45); color: #fff;
     padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 600;
   }
-  .arrow {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,0.94); border: none; border-radius: 50%;
-    width: 40px; height: 40px; font-size: 17px; cursor: pointer; color: #1d1d1f;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.13); z-index: 10;
-    display: flex; align-items: center; justify-content: center;
-    transition: box-shadow .2s, transform .2s;
-  }
-  .arrow:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.2); transform: translateY(-50%) scale(1.08); }
-  .arrow-left  { left: 12px; }
-  .arrow-right { right: 12px; }
 
   .dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
   .dot { height:7px; width:7px; border-radius:4px; background:#ccc; cursor:pointer; transition:background .25s,width .3s; }
@@ -256,8 +245,6 @@
     <div class="main-slide" id="mainSlide">
       <div class="slides-track" id="slidesTrack"></div>
       <div class="slide-counter" id="slideCounter">1 / 1</div>
-      <button class="arrow arrow-left"  id="arrowLeft">&#8592;</button>
-      <button class="arrow arrow-right" id="arrowRight">&#8594;</button>
     </div>
     <div class="dots"   id="dots"></div>
     <div class="thumbs" id="thumbs"></div>
@@ -314,14 +301,14 @@ function parsePrice(s) {
 
 /* ── Product data ── */
 const BUILTIN = {
-  "Chocolate Cake"   :{ longDesc:"Our Chocolate Cake is a dream for every choco-lover. Layers of moist, dark-chocolate sponge are filled with velvety ganache and finished with a glossy chocolate mirror glaze. Every bite is rich, indulgent, and deeply satisfying.", details:{"Flavour":"Dark Chocolate ","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["chocolatecake.png","chocolatecake.png","chocolatecake.png"] },
-  "Strawberry Cake"  :{ longDesc:"A celebration of fresh berries and light cream! Fluffy vanilla sponge layered with clouds of whipped fresh cream and slices of ripe, hand-picked strawberries. Light, airy, and bursting with natural fruit flavour.", details:{"Flavour":"Fresh Cream & Strawberry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["strawberrycake.png","strawberrycake.png","strawberrycake.png"] },
-  "ButterScotch Cake":{ longDesc:"Warm, buttery, and irresistibly caramel — the ultimate comfort dessert. Golden sponge layers soaked in butterscotch syrup, frosted with silky caramel buttercream, and topped with crunchy butterscotch chips.", details:{"Flavour":"Butterscotch & Caramel","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["butterscotchcake.png","butterscotchcake.png","butterscotchcake.png"] },
-  "BarbieDoll Cake"  :{ longDesc:"A showstopper for every princess! Delicate vanilla-rose sponge sculpted into a gorgeous doll-dress shape, decorated with pastel fondant ruffles and edible pearls. The Barbie figurine stands tall at the centre.", details:{"Flavour":"Vanilla Rose","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["barbiedollcake.png","barbiedollcake.png","barbiedollcake.png"] },
-  "Vanilla Cake"     :{ longDesc:"A timeless classic beloved by all ages. Made with pure vanilla and the finest butter, creating a soft, airy sponge with a delicate fragrance. Frosted with silky smooth vanilla buttercream.", details:{"Flavour":"Pure Vanilla & Buttercream","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["vanillacake.png","vanillacake.png","vanillacake.png"] },
-  "Black Forest"     :{ longDesc:"The legendary Black Forest — layers of rich dark chocolate sponge soaked in cherry syrup, filled with luscious whipped cream and whole cherries, then finished with chocolate shavings and a cherry on top.", details:{"Flavour":"Dark Chocolate & Cherry Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blackforestcake.png","blackforestcake.png","blackforestcake.png"] },
-  "White Forest"     :{ longDesc:"An elegant twist on the classic forest cake. Delicate white chocolate sponge layered with smooth white chocolate cream and juicy cherries, topped with white chocolate curls.", details:{"Flavour":"White Chocolate & Cherry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["whiteforestcake.png","whiteforestcake.png","whiteforestcake.png"] },
-  "Blueberry Cake"   :{ longDesc:"Fresh, fruity, and wonderfully fragrant. Soft vanilla sponge loaded with plump fresh blueberries, layered with blueberry compote and topped with a generous mound of cream and fresh berries.", details:{"Flavour":"Blueberry & Vanilla Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blueberrycake.png","blueberrycake.png","blueberrycake.png"] }
+  "Chocolate Cake"   :{ longDesc:"Our Chocolate Cake is a dream for every choco-lover. Layers of moist, dark-chocolate sponge are filled with velvety ganache and finished with a glossy chocolate mirror glaze. Every bite is rich, indulgent, and deeply satisfying.", details:{"Flavour":"Dark Chocolate & Ganache","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["chocolatecake.png"] },
+  "Strawberry Cake"  :{ longDesc:"A celebration of fresh berries and light cream! Fluffy vanilla sponge layered with clouds of whipped fresh cream and slices of ripe, hand-picked strawberries. Light, airy, and bursting with natural fruit flavour.", details:{"Flavour":"Fresh Cream & Strawberry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["strawberrycake.png"] },
+  "ButterScotch Cake":{ longDesc:"Warm, buttery, and irresistibly caramel — the ultimate comfort dessert. Golden sponge layers soaked in butterscotch syrup, frosted with silky caramel buttercream, and topped with crunchy butterscotch chips.", details:{"Flavour":"Butterscotch & Caramel","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["butterscotchcake.png"] },
+  "BarbieDoll Cake"  :{ longDesc:"A showstopper for every princess! Delicate vanilla-rose sponge sculpted into a gorgeous doll-dress shape, decorated with pastel fondant ruffles and edible pearls. The Barbie figurine stands tall at the centre.", details:{"Flavour":"Vanilla Rose","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["barbiedollcake.png"] },
+  "Vanilla Cake"     :{ longDesc:"A timeless classic beloved by all ages. Made with pure vanilla and the finest butter, creating a soft, airy sponge with a delicate fragrance. Frosted with silky smooth vanilla buttercream.", details:{"Flavour":"Pure Vanilla & Buttercream","Shelf Life":"2 days room temp / 5 days refrigerated"}, gallery:["vanillacake.png"] },
+  "Black Forest"     :{ longDesc:"The legendary Black Forest — layers of rich dark chocolate sponge soaked in cherry syrup, filled with luscious whipped cream and whole cherries, then finished with chocolate shavings and a cherry on top.", details:{"Flavour":"Dark Chocolate & Cherry Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blackforestcake.png"] },
+  "White Forest"     :{ longDesc:"An elegant twist on the classic forest cake. Delicate white chocolate sponge layered with smooth white chocolate cream and juicy cherries, topped with white chocolate curls.", details:{"Flavour":"White Chocolate & Cherry","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["whiteforestcake.png"] },
+  "Blueberry Cake"   :{ longDesc:"Fresh, fruity, and wonderfully fragrant. Soft vanilla sponge loaded with plump fresh blueberries, layered with blueberry compote and topped with a generous mound of cream and fresh berries.", details:{"Flavour":"Blueberry & Vanilla Cream","Shelf Life":"1 day room temp / 3 days refrigerated"}, gallery:["blueberrycake.png"] }
 };
 
 const WEIGHTS = [
@@ -333,6 +320,8 @@ const WEIGHTS = [
 ];
 
 const adminExtras  = JSON.parse(localStorage.getItem("gbExtras") || "{}");
+// Strip allergens from any saved data
+Object.values(adminExtras).forEach(ex => { if (ex.details) delete ex.details["Allergens"]; });
 const extraDetails = Object.assign({}, BUILTIN, adminExtras);
 
 const P       = new URLSearchParams(window.location.search);
@@ -376,25 +365,11 @@ function setQty(n) {
 /* ── Slideshow ── */
 let current=0, autoTimer;
 
-function updateArrows() {
-  const left  = document.getElementById("arrowLeft");
-  const right = document.getElementById("arrowRight");
-  if (images.length <= 1) {
-    /* Only one image — hide both arrows completely */
-left.style.display  = "none";
-    right.style.display = "none";
-  } else {
-    left.style.display  = current === 0                  ? "none" : "flex";
-    right.style.display = current === images.length - 1  ? "none" : "flex";
-  }
-}
-
 function updateSlide() {
   document.getElementById("slidesTrack").style.transform=`translateX(-${current*100}%)`;
   document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("active",i===current));
   document.querySelectorAll(".thumb").forEach((t,i)=>t.classList.toggle("active",i===current));
   document.getElementById("slideCounter").textContent=`${current+1} / ${images.length}`;
-  updateArrows();
 }
 
 function goTo(i)    { current=(i+images.length)%images.length; updateSlide(); }
@@ -414,8 +389,6 @@ function buildSlideshow() {
     th.innerHTML=`<img src="${src}" alt="photo ${i+1}">`;
     th.onclick=()=>{goTo(i);resetAuto();}; thumbsEl.appendChild(th);
   });
-  document.getElementById("arrowLeft").onclick =()=>{goTo(current-1);resetAuto();};
-  document.getElementById("arrowRight").onclick=()=>{goTo(current+1);resetAuto();};
   const ms=document.getElementById("mainSlide"); let sx=0;
   ms.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;},{passive:true});
   ms.addEventListener("touchend",e=>{const d=sx-e.changedTouches[0].clientX;if(Math.abs(d)>40){goTo(d>0?current+1:current-1);resetAuto();}},{passive:true});
@@ -427,7 +400,7 @@ function buildSlideshow() {
 
 /* ── Build info ── */
 function buildInfo() {
-  const tableRows=Object.entries(extra.details||{}).filter(([,v])=>v)
+  const tableRows=Object.entries(extra.details||{}).filter(([k,v])=>v && k!=="Allergens")
     .map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");
   const wBtns=WEIGHTS.map((w,i)=>
     `<button class="weight-btn${i===0?" active":""}" onclick="selectWeight(${i})">${w.label}</button>`
