@@ -64,16 +64,6 @@
   .item-weight { font-size: 12px; color: #999; margin-bottom: 4px; }
   .item-price  { font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 8px; }
 
-  /* Inline weight selector */
-  .item-weight-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
-  .item-w-btn {
-    padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 600;
-    border: 1.5px solid #ddd; background: #fff; color: #555; cursor: pointer;
-    transition: all .15s;
-  }
-  .item-w-btn:hover  { border-color: #888; }
-  .item-w-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-
   /* Qty controls */
   .qty-ctrl {
     display: inline-flex; align-items: center;
@@ -298,23 +288,54 @@ const WEIGHTS = [
 function getCart()   { return JSON.parse(localStorage.getItem("gbCart")||"[]"); }
 function saveCart(c) { localStorage.setItem("gbCart",JSON.stringify(c)); }
 
-/* ── Qty ── */
+/* ── Surgical summary update (no full re-render) ── */
+function updateSummary() {
+  const cart = getCart();
+  const sub   = cart.reduce((s,c)=>s+((c.basePrice||parsePrice(c.price))*(c.lbs||1)*(c.qty||1)),0);
+  const count = cart.reduce((s,c)=>s+(c.qty||1),0);
+  const subEl   = document.getElementById("summarySubtotal");
+  const totalEl = document.getElementById("summaryTotal");
+  const countEl = document.getElementById("summaryCount");
+  if(subEl)   subEl.textContent   = `Rs.${sub}`;
+  if(totalEl) totalEl.textContent = `Rs.${sub}`;
+  if(countEl) countEl.textContent = `Items (${count})`;
+}
+
+/* ── Qty — update just that item's price + summary ── */
 function setQty(i, n) {
   const c=getCart();
   c[i].qty=Math.max(1,Math.min(99,parseInt(n)||1));
-  saveCart(c); render();
+  saveCart(c);
+  /* Update the input value in case it was clamped */
+  const input=document.querySelector(`[data-qty-index="${i}"]`);
+  if(input) input.value=c[i].qty;
+  /* Update that item's displayed price */
+  const priceEl=document.querySelector(`[data-price-index="${i}"]`);
+  if(priceEl){
+    const base=(c[i].basePrice||parsePrice(c[i].price));
+    priceEl.textContent=`Rs.${base*(c[i].lbs||1)*c[i].qty}`;
+  }
+  /* Update +/- button onclick values */
+  const minusBtn=document.querySelector(`[data-minus-index="${i}"]`);
+  const plusBtn =document.querySelector(`[data-plus-index="${i}"]`);
+  if(minusBtn) minusBtn.setAttribute("onclick",`setQty(${i},${c[i].qty-1})`);
+  if(plusBtn)  plusBtn.setAttribute("onclick", `setQty(${i},${c[i].qty+1})`);
+  updateSummary();
 }
 
-/* ── Weight ── */
-function setWeight(i, lbs) {
-  const c=getCart();
-  c[i].lbs = lbs;
-  saveCart(c); render();
-}
-
-/* ── Remove item ── */
+/* ── Remove item — remove DOM node + update summary ── */
 function removeItem(i) {
-  const c=getCart(); c.splice(i,1); saveCart(c); render();
+  const c=getCart(); c.splice(i,1); saveCart(c);
+  const row=document.querySelector(`[data-item-index="${i}"]`);
+  if(row){
+    row.style.transition="opacity .25s, transform .25s";
+    row.style.opacity="0";
+    row.style.transform="translateX(30px)";
+    setTimeout(()=>{
+      /* Re-render fully after animation — index numbers shift after splice */
+      render();
+    },260);
+  } else { render(); }
 }
 
 /* ── Clear cart dialog ── */
@@ -322,6 +343,9 @@ function clearCart()    { document.getElementById("clearDialog").classList.add("
 function closeDialog()  { document.getElementById("clearDialog").classList.remove("open"); }
 function confirmClear() { saveCart([]); closeDialog(); render(); }
 document.getElementById("clearDialog").addEventListener("click",function(e){if(e.target===this)closeDialog();});
+
+/* Cross-tab sync: if cart changes in another tab, re-render here */
+window.addEventListener("storage", e => { if(e.key==="gbCart") render(); });
 
 /* ── Per-item Order Popup ── */
 let _cartPopItem = null;
@@ -419,34 +443,26 @@ function render() {
     return;
   }
 
-  const items=cart.map((c,i)=>{
-    const lbs = c.lbs || 1;
-    const base = c.basePrice || parsePrice(c.price);
-    const itemTotal = base * lbs * (c.qty||1);
-    const weightBtns = [1,2,3,4,5].map(lb=>
-      `<button class="item-w-btn${lbs===lb?' active':''}" onclick="setWeight(${i},${lb})">${lb}lb</button>`
-    ).join('');
-    return `
-    <div class="cart-item">
+  const items=cart.map((c,i)=>`
+    <div class="cart-item" data-item-index="${i}">
       <img src="${c.img}" alt="${c.name}"
         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22><rect fill=%22%23f5f5f5%22 width=%2280%22 height=%2280%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2232%22>🎂</text></svg>'">
       <div class="item-info">
         <div class="item-name">${c.name}</div>
-        <div class="item-weight-row">${weightBtns}</div>
-        <div class="item-price">Rs.${itemTotal}</div>
+        ${c.weight?`<div class="item-weight">⚖️ ${c.weight}</div>`:""}
+        <div class="item-price" data-price-index="${i}">Rs.${(c.basePrice||parsePrice(c.price))*(c.lbs||1)*(c.qty||1)}</div>
         <div class="qty-ctrl">
-          <button class="qty-btn" onclick="setQty(${i},${(c.qty||1)-1})">−</button>
+          <button class="qty-btn" data-minus-index="${i}" onclick="setQty(${i},${(c.qty||1)-1})">−</button>
           <input  class="qty-num" type="number" value="${c.qty||1}" min="1" max="99"
-                  onchange="setQty(${i},this.value)">
-          <button class="qty-btn" onclick="setQty(${i},${(c.qty||1)+1})">+</button>
+                  data-qty-index="${i}" onchange="setQty(${i},this.value)">
+          <button class="qty-btn" data-plus-index="${i}" onclick="setQty(${i},${(c.qty||1)+1})">+</button>
         </div>
       </div>
       <div class="item-right">
         <button class="remove-btn" onclick="removeItem(${i})">✕</button>
         <button class="item-order-btn" onclick="openItemOrderPopup(${i})">Order Now</button>
       </div>
-    </div>`;
-  }).join("");
+    </div>`).join("");
 
   const sub  =cart.reduce((s,c)=>s+((c.basePrice||parsePrice(c.price))*(c.lbs||1)*(c.qty||1)),0);
   const count=cart.reduce((s,c)=>s+(c.qty||1),0);
@@ -455,10 +471,11 @@ function render() {
     ${items}
     <div class="summary-card">
       <h2>Order Summary</h2>
-      <div class="summary-row"><span>Items (${count})</span><span>Rs.${sub}</span></div>
-      <div class="summary-row total"><span>Total</span><span>Rs.${sub}</span></div>
+      <div class="summary-row"><span id="summaryCount">Items (${count})</span><span id="summarySubtotal">Rs.${sub}</span></div>
+      <div class="summary-row total"><span>Total</span><span id="summaryTotal">Rs.${sub}</span></div>
       <div class="cart-actions">
-        <button class="btn-clear" onclick="clearCart()">🗑 Clear Cart</button>
+        <button class="btn-order-all" onclick="orderAll()">📲 Order All via WhatsApp</button>
+        <button class="btn-clear"     onclick="clearCart()">🗑 Clear Cart</button>
       </div>
       <div class="secure-note">🔒 Order sent securely via WhatsApp</div>
     </div>`;
