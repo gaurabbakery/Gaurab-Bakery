@@ -8,53 +8,10 @@ const DEFAULT_PRODUCTS = [
   { name:"ButterScotch Cake", desc:"Buttery cake with rich caramel flavor",    price:"Rs.600", img:"butterscotchcake.png" },
   { name:"BarbieDoll Cake",   desc:"Sweet and creamy barbiedoll cake",         price:"Rs.600", img:"barbiedollcake.png"   },
   { name:"Vanilla Cake",      desc:"Classic soft and fluffy vanilla sponge",   price:"Rs.550", img:"vanillacake.png"      },
-  { name:"Black Forest",      desc:"Chocolate sponge with cream and cherries", price:"Rs.750", img:"blackforestcake.png"  },
-  { name:"White Forest",      desc:"White chocolate sponge with fresh cream",  price:"Rs.700", img:"whiteforestcake.png"  },
-  { name:"Blueberry Cake",    desc:"Soft cake topped with fresh blueberries",  price:"Rs.650", img:"blueberrycake.png"    }
+  { name:"Black Forest",      desc:"Chocolate sponge with cream and cherries", price:"Rs.750", img:"blackforestcake.png"      },
+  { name:"White Forest",      desc:"White chocolate sponge with fresh cream",  price:"Rs.700", img:"whiteforestcake.png"      },
+  { name:"Blueberry Cake",    desc:"Soft cake topped with fresh blueberries",  price:"Rs.650", img:"blueberrycake.png"        }
 ];
-
-const DEFAULT_EXTRAS = {
-  "Chocolate Cake": {
-    longDesc: "Dive into pure indulgence with our Chocolate Cake — rich layers of moist dark chocolate sponge filled with velvety chocolate ganache and topped with a glossy chocolate glaze. Every bite is a deep, satisfying treat for true chocolate lovers. Baked fresh daily with premium cocoa.",
-    details: { "Flavour":"Dark Chocolate & Ganache", "Shelf Life":"2 days refrigerated", "Serves":"8–10 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["chocolatecake.png"]
-  },
-  "Strawberry Cake": {
-    longDesc: "Fresh, fruity and utterly delightful — our Strawberry Cake layers soft vanilla sponge with luscious strawberry cream and fresh strawberry slices. Crowned with whipped cream rosettes and glazed berries, it's a showstopper for any celebration.",
-    details: { "Flavour":"Strawberry & Fresh Cream", "Shelf Life":"2 days refrigerated", "Serves":"8–10 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["strawberrycake.png"]
-  },
-  "ButterScotch Cake": {
-    longDesc: "Rich, buttery and irresistibly golden — our ButterScotch Cake is loaded with smooth caramel-toffee cream between tender sponge layers, drizzled with warm butterscotch sauce and finished with crunchy caramel bits. A nostalgic favourite reimagined.",
-    details: { "Flavour":"Butterscotch & Caramel Toffee", "Shelf Life":"2 days refrigerated", "Serves":"8–10 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["butterscotchcake.png"]
-  },
-  "BarbieDoll Cake": {
-    longDesc: "Make her day magical with our BarbieDoll Cake — a dreamy pink layered cake sculpted around a doll figure, adorned with rosette swirls, edible pearls and pastel frosting. As beautiful as it is delicious, this is the ultimate celebration cake for little ones.",
-    details: { "Flavour":"Vanilla & Rose Cream", "Shelf Life":"2 days refrigerated", "Serves":"10–14 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["barbiedollcake.png"]
-  },
-  "Vanilla Cake": {
-    longDesc: "Our signature Vanilla Cake is a timeless classic — a cloud-soft sponge baked with pure Madagascar vanilla essence, frosted with silky smooth vanilla buttercream. Simple, elegant and always a crowd favourite. The perfect canvas for any celebration.",
-    details: { "Flavour":"Pure Madagascar Vanilla", "Shelf Life":"2 days room temperature", "Serves":"8–10 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["vanillacake.png"]
-  },
-  "Black Forest": {
-    longDesc: "Indulge in our classic Black Forest Cake — moist chocolate sponge layers soaked in cherry syrup, generously filled with hand-whipped cream and topped with dark chocolate shavings and glazed cherries. A timeless European masterpiece baked fresh for every order.",
-    details: { "Flavour":"Dark Chocolate & Cherry", "Shelf Life":"2 days refrigerated", "Serves":"8–10 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["blackforestcake.png"]
-  },
-  "White Forest": {
-    longDesc: "Our White Forest Cake is a delicate masterpiece — light white chocolate sponge layered with silky whipped cream, white chocolate curls and fresh cherries. Elegant, creamy and irresistibly soft, it is the perfect choice for those who love something a little lighter.",
-    details: { "Flavour":"White Chocolate & Fresh Cream", "Shelf Life":"2 days refrigerated", "Serves":"8–10 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["whiteforestcake.png"]
-  },
-  "Blueberry Cake": {
-    longDesc: "A burst of freshness in every bite — our Blueberry Cake features a soft vanilla sponge generously topped with luscious blueberry compote and fresh whole blueberries. Perfectly balanced between sweet and tangy, it is as beautiful as it is delicious.",
-    details: { "Flavour":"Fresh Blueberry & Vanilla", "Shelf Life":"2 days refrigerated", "Serves":"8–10 people", "Allergens":"Milk, Eggs, Gluten" },
-    gallery:["blueberrycake.png"]
-  }
-};
 
 const WEIGHT_OPTIONS = [
   { label:"1 Pound",  lbs:1 },
@@ -66,26 +23,22 @@ const WEIGHT_OPTIONS = [
 
 /* ── Helpers ── */
 function getProducts()   { const s=localStorage.getItem("gbProducts"); if(s)return JSON.parse(s); localStorage.setItem("gbProducts",JSON.stringify(DEFAULT_PRODUCTS)); return DEFAULT_PRODUCTS; }
-function getExtras()     { const s=localStorage.getItem("gbExtras");   if(s)return JSON.parse(s); localStorage.setItem("gbExtras",JSON.stringify(DEFAULT_EXTRAS));    return DEFAULT_EXTRAS; }
 function getCart()       { return JSON.parse(localStorage.getItem("gbCart")     || "[]"); }
+function getWishlist()   { return JSON.parse(localStorage.getItem("gbWishlist") || "[]"); }
 function saveCart(c)     { localStorage.setItem("gbCart",     JSON.stringify(c)); }
+function saveWishlist(w) { localStorage.setItem("gbWishlist", JSON.stringify(w)); }
 
+/* ── FIXED parsePrice: grabs first number from string ── */
+/* "Rs.700" → 700,  ".700" would be wrong but this gives 700 correctly */
 function parsePrice(s) {
   const m = String(s || "").match(/\d+/);
   return m ? parseInt(m[0], 10) : 0;
 }
 
-/* Seed extras on first load */
-(function seedExtras() {
-  if (!localStorage.getItem("gbExtras")) {
-    localStorage.setItem("gbExtras", JSON.stringify(DEFAULT_EXTRAS));
-  }
-})();
-
 let products = getProducts();
 
 /* ══════════════════════════════════════════
-   ORDER POPUP
+   ORDER POPUP — same popup used everywhere
 ══════════════════════════════════════════ */
 (function injectPopup() {
   if (document.getElementById("gb-order-overlay")) return;
@@ -98,13 +51,15 @@ let products = getProducts();
       align-items:center; justify-content:center; padding:20px;
     }
     #gb-order-overlay.open { display:flex; }
+
     #gb-order-popup {
       background:#fff; border-radius:24px;
-      padding:26px 22px; width:100%; max-width:380px;
+      padding:26px 22px; width:100%; max-width:360px;
       box-shadow:0 24px 60px rgba(0,0,0,0.22);
       animation:gbPopIn .22s ease;
     }
     @keyframes gbPopIn { from{transform:scale(0.9);opacity:0;} to{transform:scale(1);opacity:1;} }
+
     #gb-order-popup .pop-img {
       width:100%; height:160px; object-fit:cover;
       border-radius:14px; margin-bottom:14px; display:block; background:#f5f5f5;
@@ -120,23 +75,6 @@ let products = getProducts();
     }
     #gb-order-popup .pop-w-btn:hover  { border-color:#888; }
     #gb-order-popup .pop-w-btn.active { background:#1a1a1a; color:#fff; border-color:#1a1a1a; }
-
-    /* Quantity row */
-    #gb-order-popup .pop-qty-row {
-      display:flex; align-items:center; gap:0; margin-bottom:16px;
-      border:1.5px solid #e0e0e0; border-radius:20px; overflow:hidden;
-      width:fit-content;
-    }
-    #gb-order-popup .pop-qty-btn {
-      background:none; border:none; width:38px; height:38px;
-      font-size:22px; font-weight:300; cursor:pointer; color:#1d1d1f;
-      display:flex; align-items:center; justify-content:center; transition:background .15s;
-    }
-    #gb-order-popup .pop-qty-btn:hover { background:#f5f5f5; }
-    #gb-order-popup .pop-qty-num {
-      min-width:38px; text-align:center; font-size:15px; font-weight:800; color:#1a1a1a;
-    }
-
     #gb-order-popup .pop-price-box {
       background:#f8f8f8; border-radius:13px;
       padding:13px 16px; margin-bottom:18px;
@@ -171,12 +109,6 @@ let products = getProducts();
       <div class="pop-note" id="popNote"></div>
       <div class="pop-lbl">Select Weight</div>
       <div class="pop-weights" id="popWeights"></div>
-      <div class="pop-lbl">Quantity</div>
-      <div class="pop-qty-row">
-        <button class="pop-qty-btn" onclick="changePopQty(-1)">−</button>
-        <span class="pop-qty-num" id="popQtyNum">1</span>
-        <button class="pop-qty-btn" onclick="changePopQty(1)">+</button>
-      </div>
       <div class="pop-price-box">
         <div class="pop-price-lbl">Total Price</div>
         <div class="pop-price-val" id="popPriceVal"></div>
@@ -194,19 +126,17 @@ let products = getProducts();
 let _popItem      = null;
 let _popBasePrice = 0;
 let _popWeight    = WEIGHT_OPTIONS[0];
-let _popQty       = 1;
 
 function openOrderPopup(item) {
   _popItem      = item;
+  /* basePrice is the 1-pound price — stored on item, or parsed from item.price */
   _popBasePrice = item.basePrice || parsePrice(item.price);
   _popWeight    = WEIGHT_OPTIONS[0];
-  _popQty       = 1;
 
   document.getElementById("popImg").src          = item.img;
   document.getElementById("popImg").alt          = item.name;
   document.getElementById("popName").textContent = item.name;
   document.getElementById("popNote").textContent = `Rs.${_popBasePrice} per pound`;
-  document.getElementById("popQtyNum").textContent = "1";
 
   document.getElementById("popWeights").innerHTML = WEIGHT_OPTIONS.map((w,i) =>
     `<button class="pop-w-btn${i===0?" active":""}" onclick="selectPopWeight(${i})">${w.label}</button>`
@@ -224,14 +154,8 @@ function selectPopWeight(idx) {
   refreshPopPrice();
 }
 
-function changePopQty(delta) {
-  _popQty = Math.max(1, Math.min(99, _popQty + delta));
-  document.getElementById("popQtyNum").textContent = _popQty;
-  refreshPopPrice();
-}
-
 function refreshPopPrice() {
-  const total = _popBasePrice * _popWeight.lbs * _popQty;
+  const total = _popBasePrice * _popWeight.lbs;
   const el    = document.getElementById("popPriceVal");
   el.textContent     = `Rs.${total}`;
   el.style.transform = "scale(1.12)";
@@ -245,13 +169,12 @@ function closeOrderPopup() {
 
 function confirmOrderPopup() {
   if (!_popItem) return;
-  const total = _popBasePrice * _popWeight.lbs * _popQty;
+  const total = _popBasePrice * _popWeight.lbs;
   const text  =
     `Hello! I want to order from Gaurab Bakery:\n\n` +
-    `🎂 Cake     : ${_popItem.name}\n` +
-    `⚖️ Weight   : ${_popWeight.label}\n` +
-    `🔢 Quantity : ${_popQty}\n` +
-    `💰 Price    : Rs.${total}\n\n` +
+    `🎂 Cake   : ${_popItem.name}\n` +
+    `⚖️ Weight : ${_popWeight.label}\n` +
+    `💰 Price  : Rs.${total}\n\n` +
     `Please confirm my order. Thank you!`;
   window.open(`https://wa.me/9779860228877?text=${encodeURIComponent(text)}`);
   closeOrderPopup();
@@ -285,16 +208,39 @@ document.addEventListener("click", e => {
 })();
 
 /* ══════════════════════════════════════════
-   CARD HTML  (no wishlist button)
+   WISHLIST
+══════════════════════════════════════════ */
+function toggleWishlist(name, btn) {
+  let wl=getWishlist(), i=wl.indexOf(name);
+  if(i===-1){wl.push(name);btn.textContent="❤️";}
+  else{wl.splice(i,1);btn.textContent="🤍";}
+  saveWishlist(wl);
+  btn.style.transform="scale(1.4)";
+  setTimeout(()=>btn.style.transform="scale(1)",220);
+}
+
+/* ══════════════════════════════════════════
+   CARD HTML
 ══════════════════════════════════════════ */
 function cardHTML(p) {
-  const safe = JSON.stringify(p).replace(/"/g,"&quot;");
+  const safe  = JSON.stringify(p).replace(/"/g,"&quot;");
+  const heart = getWishlist().includes(p.name)?"❤️":"🤍";
   return `
     <div class="card" style="cursor:pointer;position:relative;" onclick="openDetail(${safe})">
+      <button style="
+        position:absolute;top:10px;right:10px;z-index:5;
+        background:rgba(255,255,255,0.92);border:none;
+        border-radius:50%;width:36px;height:36px;font-size:16px;
+        cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);
+        display:flex;align-items:center;justify-content:center;transition:transform .2s;
+      " onclick="event.stopPropagation();toggleWishlist('${p.name.replace(/'/g,"\\'")}',this)"
+         title="Wishlist">${heart}</button>
+
       <div class="img-wrap">
         <img src="${p.img}" alt="${p.name}" loading="lazy"
           onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23f5f5f5%22 width=%22200%22 height=%22200%22/><text x=%2250%%22 y=%2252%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22>🎂</text></svg>'">
       </div>
+
       <div class="content">
         <h2>${p.name}</h2>
         <p>${p.desc}</p>
@@ -370,16 +316,18 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 /* ══════════════════════════════════════════
-   ADD TO CART
+   ADD TO CART  — stores basePrice for popup
 ══════════════════════════════════════════ */
 function addToCart(item, btn) {
   const cart=getCart();
   const base=parsePrice(item.price);
-  const ex=cart.find(c=>c.name===item.name);
+  const ex=cart.find(c=>c.name===item.name&&!c.weight);
   if(ex) ex.qty=(ex.qty||1)+1;
-  else   cart.push({...item, qty:1, lbs:1, basePrice:base});
+  else   cart.push({...item, qty:1, basePrice:base});
   saveCart(cart);
-  updateCartBadge();
+
+  /* Update badge directly from the in-memory cart — no re-read needed */
+  _updateBadge(cart.reduce((s,c)=>s+(c.qty||1),0));
 
   if(btn){
     const orig=btn.textContent;
@@ -394,18 +342,28 @@ function addToCart(item, btn) {
       btn.style.borderColor="";
     },1800);
   }
-  const badge=document.getElementById("cartCount");
-  if(badge){badge.style.transform="scale(1.7)";setTimeout(()=>badge.style.transform="scale(1)",300);}
 }
 
 /* ══════════════════════════════════════════
-   CART BADGE
+   CART BADGE  — single source of truth
 ══════════════════════════════════════════ */
-function updateCartBadge() {
-  const total=getCart().reduce((s,c)=>s+(c.qty||1),0);
+function _updateBadge(count) {
   const el=document.getElementById("cartCount");
-  if(el){el.innerText=total;el.style.transition="transform .3s";}
+  if(!el) return;
+  el.textContent=count;
+  el.style.transition="transform .3s";
+  el.style.transform="scale(1.7)";
+  setTimeout(()=>el.style.transform="scale(1)",300);
 }
+
+function updateCartBadge() {
+  _updateBadge(getCart().reduce((s,c)=>s+(c.qty||1),0));
+}
+
+/* Cross-tab / cross-window sync: if cart changes anywhere, badge updates here too */
+window.addEventListener("storage", e => {
+  if (e.key === "gbCart") updateCartBadge();
+});
 
 /* ══════════════════════════════════════════
    OPEN DETAIL WINDOW
