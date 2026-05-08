@@ -24,9 +24,7 @@ const WEIGHT_OPTIONS = [
 /* ── Helpers ── */
 function getProducts()   { const s=localStorage.getItem("gbProducts"); if(s)return JSON.parse(s); localStorage.setItem("gbProducts",JSON.stringify(DEFAULT_PRODUCTS)); return DEFAULT_PRODUCTS; }
 function getCart()       { return JSON.parse(localStorage.getItem("gbCart")     || "[]"); }
-function getWishlist()   { return JSON.parse(localStorage.getItem("gbWishlist") || "[]"); }
 function saveCart(c)     { localStorage.setItem("gbCart",     JSON.stringify(c)); }
-function saveWishlist(w) { localStorage.setItem("gbWishlist", JSON.stringify(w)); }
 
 /* ── FIXED parsePrice: grabs first number from string ── */
 /* "Rs.700" → 700,  ".700" would be wrong but this gives 700 correctly */
@@ -208,34 +206,12 @@ document.addEventListener("click", e => {
 })();
 
 /* ══════════════════════════════════════════
-   WISHLIST
-══════════════════════════════════════════ */
-function toggleWishlist(name, btn) {
-  let wl=getWishlist(), i=wl.indexOf(name);
-  if(i===-1){wl.push(name);btn.textContent="❤️";}
-  else{wl.splice(i,1);btn.textContent="🤍";}
-  saveWishlist(wl);
-  btn.style.transform="scale(1.4)";
-  setTimeout(()=>btn.style.transform="scale(1)",220);
-}
-
-/* ══════════════════════════════════════════
    CARD HTML
 ══════════════════════════════════════════ */
 function cardHTML(p) {
   const safe  = JSON.stringify(p).replace(/"/g,"&quot;");
-  const heart = getWishlist().includes(p.name)?"❤️":"🤍";
   return `
     <div class="card" style="cursor:pointer;position:relative;" onclick="openDetail(${safe})">
-      <button style="
-        position:absolute;top:10px;right:10px;z-index:5;
-        background:rgba(255,255,255,0.92);border:none;
-        border-radius:50%;width:36px;height:36px;font-size:16px;
-        cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);
-        display:flex;align-items:center;justify-content:center;transition:transform .2s;
-      " onclick="event.stopPropagation();toggleWishlist('${p.name.replace(/'/g,"\\'")}',this)"
-         title="Wishlist">${heart}</button>
-
       <div class="img-wrap">
         <img src="${p.img}" alt="${p.name}" loading="lazy"
           onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23f5f5f5%22 width=%22200%22 height=%22200%22/><text x=%2250%%22 y=%2252%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2248%22>🎂</text></svg>'">
@@ -325,9 +301,7 @@ function addToCart(item, btn) {
   if(ex) ex.qty=(ex.qty||1)+1;
   else   cart.push({...item, qty:1, basePrice:base});
   saveCart(cart);
-
-  /* Update badge directly from the in-memory cart — no re-read needed */
-  _updateBadge(cart.reduce((s,c)=>s+(c.qty||1),0));
+  updateCartBadge();
 
   if(btn){
     const orig=btn.textContent;
@@ -342,28 +316,18 @@ function addToCart(item, btn) {
       btn.style.borderColor="";
     },1800);
   }
+  const badge=document.getElementById("cartCount");
+  if(badge){badge.style.transform="scale(1.7)";setTimeout(()=>badge.style.transform="scale(1)",300);}
 }
 
 /* ══════════════════════════════════════════
-   CART BADGE  — single source of truth
+   CART BADGE
 ══════════════════════════════════════════ */
-function _updateBadge(count) {
-  const el=document.getElementById("cartCount");
-  if(!el) return;
-  el.textContent=count;
-  el.style.transition="transform .3s";
-  el.style.transform="scale(1.7)";
-  setTimeout(()=>el.style.transform="scale(1)",300);
-}
-
 function updateCartBadge() {
-  _updateBadge(getCart().reduce((s,c)=>s+(c.qty||1),0));
+  const total=getCart().reduce((s,c)=>s+(c.qty||1),0);
+  const el=document.getElementById("cartCount");
+  if(el){el.innerText=total;el.style.transition="transform .3s";}
 }
-
-/* Cross-tab / cross-window sync: if cart changes anywhere, badge updates here too */
-window.addEventListener("storage", e => {
-  if (e.key === "gbCart") updateCartBadge();
-});
 
 /* ══════════════════════════════════════════
    OPEN DETAIL WINDOW
@@ -377,3 +341,4 @@ function goCart() { window.location.href="cart.html"; }
 
 loadProducts();
 updateCartBadge();
+
